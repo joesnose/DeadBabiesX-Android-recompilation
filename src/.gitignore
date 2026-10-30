@@ -1,0 +1,5 @@
+build/
+native.log
+*.exe
+*.dll
+*.ogg

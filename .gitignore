@@ -1,0 +1,8 @@
+/build*/
+/.local/
+/third_party/SDL2-2.32.10/
+*.jks
+*.keystore
+*.idsig
+
+/build-verification.log

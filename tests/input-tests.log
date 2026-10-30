@@ -1,0 +1,62 @@
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: bottom centre stays clear
+PASS: both touch sticks remain independent
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: bottom centre stays clear
+PASS: both touch sticks remain independent
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: side button activates correct game action
+PASS: side button releases
+PASS: visible side button matches hit target
+PASS: bottom centre stays clear
+PASS: both touch sticks remain independent
+PASS: virtual game controller attaches
+Controller mappings loaded: 451
+Controller connected: DBX virtual controller
+PASS: startup and queued add event open controller once
+PASS: controller movement and aim sticks mapped
+PASS: right trigger fires
+PASS: right trigger release stops firing
+PASS: left trigger alternate fire
+PASS: controller A pickup/confirm edge
+PASS: right shoulder special one
+PASS: left shoulder special two
+PASS: D-pad moves player
+PASS: Start pause edge
+PASS: disconnect clears controller and requests pause
+Controller connected: DBX virtual controller
+PASS: hot-plug reconnect opens controller
+INPUT TESTS: 0 failures

@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deadbabies", "deadbabies.vcproj", "{DE797E93-52F0-4782-B797-4769D4DEB570}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{DE797E93-52F0-4782-B797-4769D4DEB570}.Debug.ActiveCfg = Debug|Xbox
+		{DE797E93-52F0-4782-B797-4769D4DEB570}.Debug.Build.0 = Debug|Xbox
+		{DE797E93-52F0-4782-B797-4769D4DEB570}.Release.ActiveCfg = Release|Xbox
+		{DE797E93-52F0-4782-B797-4769D4DEB570}.Release.Build.0 = Release|Xbox
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,27 @@
+PASS: original swept collision response
+PASS: swept collision miss
+PASS: machine gun creates a projectile
+PASS: machine gun fires from its moving muzzle
+PASS: machine gun velocity is finite
+PASS: flamethrower creates a projectile
+PASS: flame retains its originating player and muzzle
+PASS: flame velocity is finite
+PASS: normal pickups stop at weapon level 3
+PASS: mega pickups reach and stop at weapon level 5
+PASS: original grenade fragment counts preserved
+PASS: machine gun impulse scales through level 5
+PASS: mega plasma emits every shot in its fan
+PASS: level 4/5 plasma shots have finite full-speed velocities
+PASS: mega grenade retains launcher power
+PASS: level 4/5 remote grenade produces 80/100 fragments
+PASS: mega rocket volley contains 4/5 rockets
+PASS: mega railgun cooldown continues to scale
+PASS: mega flame range/lifetime scales to levels 4/5
+PASS: mega plasma emits every shot in its fan
+PASS: level 4/5 plasma shots have finite full-speed velocities
+PASS: mega grenade retains launcher power
+PASS: level 4/5 remote grenade produces 80/100 fragments
+PASS: mega rocket volley contains 4/5 rockets
+PASS: mega railgun cooldown continues to scale
+PASS: mega flame range/lifetime scales to levels 4/5
+Self-test: 0 failures
