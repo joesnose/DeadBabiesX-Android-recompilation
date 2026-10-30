@@ -145,3 +145,12 @@ void NativePrepareGameplayController(int slot);
 #ifndef __ANDROID__
 bool NativeIsHeadlessInputTest();
 #endif
+
+#ifndef __ANDROID__
+void NativeSetHeadlessInputTest(bool);
+#endif
+
+XBGAMEPAD NativeLanReadLocalInput();
+#ifndef __ANDROID__
+bool NativeLanLatchSelfTest();
+#endif

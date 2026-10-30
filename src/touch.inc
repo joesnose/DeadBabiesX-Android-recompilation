@@ -2,9 +2,10 @@ static bool touchPlaying=false,touchResults=false;static int tapRow=-1;static fl
 struct Finger{float x,y;int role;};static std::map<SDL_FingerID,Finger> fingers;
 static SDL_JoystickID lastMenuController=-1;
 static bool awaitingSoloController=false;
+static XBGAMEPAD lanLocalInput;static WORD lanButtonLatch=0;static unsigned lanAnalogLatch=0;
 static SDL_GameController* controllers[4]{};static bool pausePulse=false,confirmPulse=false;
 void NativeSetTouchScene(bool playing,bool results){if(playing!=touchPlaying||results!=touchResults){fingers.clear();tapPending=false;}touchPlaying=playing;touchResults=results;}
-int NativeTakeMenuTap(bool paused){if(!tapPending)return -1;tapPending=false;float top=paused?190:170;int row=(int)std::floor((tapY-(top-4))/35);if(tapX>=132&&tapX<=508&&row>=0&&row<(paused?5:6)&&tapY<top+row*35+26)return row;return -1;}
+int NativeTakeMenuTap(bool paused){if(!tapPending)return -1;tapPending=false;float top=paused?190:170;float rowHeight=paused?35:31;int row=(int)std::floor((tapY-(top-4))/rowHeight);if(tapX>=132&&tapX<=508&&row>=0&&row<(paused?5:7)&&tapY<top+row*rowHeight+26)return row;return -1;}
 struct TouchButton {int role;float x,y,w,h;const char*label;};
 static std::array<TouchButton,5> touchButtons(){
  float w=viewportW*520.f/viewportH;
@@ -65,7 +66,7 @@ static void pollEvents(){SDL_Event e;do{
  }while(background&&running);}
 static void updatePads(){
  // A round started by touch can adopt the first controller actually used.
- if(awaitingSoloController&&touchPlaying&&Game.m_NumPlayers==1){
+ if(awaitingSoloController&&touchPlaying&&(Game.m_NumPlayers==1||LanActive())){
   for(int i=0;i<4;i++)if(controllers[i]){
    bool active=false;
    for(int b=0;b<SDL_CONTROLLER_BUTTON_MAX;b++)active|=SDL_GameControllerGetButton(controllers[i],(SDL_GameControllerButton)b)!=0;
@@ -91,6 +92,8 @@ static void updatePads(){
  }
  p.hDevice=(c||i==0)?(HANDLE)(uintptr_t)(i+1):nullptr;p.wPressedButtons=buttons&~p.wLastButtons;p.wButtons=p.wLastButtons=buttons;
  for(int j=0;j<8;j++){p.bPressedAnalogButtons[j]=analog[j]>75&&!p.bLastAnalogButtons[j];p.bLastAnalogButtons[j]=analog[j]>75;p.bAnalogButtons[j]=analog[j];}p.fX1=lx;p.fY1=ly;p.fX2=rx;p.fY2=ry;
+ if(i==0){if(LanActive()){lanLocalInput=p;lanButtonLatch|=buttons;for(int j=0;j<8;j++)if(analog[j]>75)lanAnalogLatch|=1u<<j;}else{lanLocalInput=XBGAMEPAD{};lanButtonLatch=0;lanAnalogLatch=0;}}
+
  }
 }
 static void controlBox(float x,float y,float w,float h,const char*label){XEngine->FillRect(x,y,w,h,.05f,.04f,.03f,.62f);XEngine->FillRect(x,y,w,1,.8f,.56f,.3f,.8f);XEngine->DrawUiText(label,x+w/2,y+h/2-6,9,245,214,170,true);}
@@ -99,3 +102,8 @@ static void drawTouch(){if(!touchPlaying||touchResults)return;glViewport(0,0,vie
  controlBox(.89f*w-58,.70f*520-58,116,116,"AIM / FIRE");
  for(const auto&b:touchButtons())controlBox(b.x,b.y,b.w,b.h,b.label);
 }
+
+XBGAMEPAD NativeLanReadLocalInput(){auto p=lanLocalInput;p.wButtons|=lanButtonLatch;for(int j=0;j<8;j++)if(lanAnalogLatch&(1u<<j))p.bAnalogButtons[j]=255;lanButtonLatch=0;lanAnalogLatch=0;return p;}
+#ifndef __ANDROID__
+bool NativeLanLatchSelfTest(){pausePulse=true;confirmPulse=true;updatePads();updatePads();auto first=NativeLanReadLocalInput();updatePads();auto second=NativeLanReadLocalInput();return (first.wButtons&16)&&first.bAnalogButtons[0]==255&&!(second.wButtons&16)&&second.bAnalogButtons[0]==0;}
+#endif

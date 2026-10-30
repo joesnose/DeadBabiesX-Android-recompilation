@@ -8,6 +8,10 @@
 // SHIT LIKE THAT BIG RE-ORAGANIZATION!!
 
 #include "game.h"
+#include "lan.h"
+#include "sync_rng.h"
+#define rand NativeGameRandom
+#define srand NativeGameSeed
 #include "results_presentation.h"
 #include "ui_style.h"
 #include <cstring>
@@ -1655,7 +1659,7 @@ void CGame::LoadArt() {
 }
 
 void CGame::Init() {
-  srand(XEngine->m_Millisecs.LowPart);
+  srand(LanActive()?LanSeed():XEngine->m_Millisecs.LowPart);
 
   m_BabyList.clear();
   m_RocketList.clear();
@@ -1835,7 +1839,8 @@ int CGame::Update() {
   }
   if (m_NumPlayers <= 0) {
     if (!m_ResultsReady) FinishRound();
-    m_ResultsTime = float(GetTickCount64() - m_ResultsStarted) * .06f;
+    if(LanActive())m_ResultsTime += XEngine->GetTween();
+    else m_ResultsTime = float(GetTickCount64() - m_ResultsStarted) * .06f;
     if (!m_ResultWinnerRevealed && !m_ResultOrder.empty() &&
         m_ResultsTime / 60.f >= NativeResultRollDuration(m_ResultOrder.size())) {
       m_ResultWinnerRevealed = true;
@@ -3979,7 +3984,7 @@ void CGame::Refresh() {
         float PosX = MachineGun->m_HotPoint.x + DX / OffsetLength * 24.0f;
         float PosY = MachineGun->m_HotPoint.y + DY / OffsetLength * 24.0f;
 
-        float Scale = 75.0f + Rand() * 32.0f;
+        float Scale = 91.0f + Sin(XEngine->m_Ticks*31.f+Player->m_ControllerNum*57.f)*16.f;
 
         XEngine->DrawSprite(m_MuzzleFlashImage[MachineGun->m_FlashType], PosX,
                             PosY, Scale, Scale, Angle);

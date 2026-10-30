@@ -1,11 +1,11 @@
 # DeadBabiesX-Android-recompilation
-This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was able to find the source code and get AI to recompile it for android. This is 100% AI generated. Its a great retro vibed game that i always loved on Xbox, a few option have been added but it remains basically the same.
+This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was able to find the source code and get AI to recompile it for android. This is 100% AI generated. Its a great retro vibed game that i always loved on Xbox, a few option have been added but it remains basically the same. 4 player was great but have not tested it on android yet.
 
 Native Android port of Dead Babies Xtreme, with touch controls, controller support, selectable graphics themes, and music. Based on the original game by Chris Friesen and contributors.
 
-**[Download Android v1.2 APK](downloads/DeadBabiesX-Android-v1.2.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
+**[Download Android v1.3 LAN APK](downloads/DeadBabiesX-Android-v1.3-LAN.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
 
-Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.2 installs over the previous Android preview builds and keeps the high score.
+Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.3 installs over the previous Android preview builds and keeps the high score.
 
 ## Controls
 
@@ -22,7 +22,35 @@ Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK,
 
 Touch menus by tapping a row. Pickup and SP1 are on the left side; Alt and SP2 are on the right. Pause is at the top right. Pair Bluetooth controllers in Android settings or connect a compatible USB controller before use.
 
-Version 1.2 assigns the controller that starts the round to **player one**, even when Android enumerates a passive input device first. A solo round started by touch adopts the first controller used. Additional controllers remain available for local players. This port does not add internet multiplayer.
+Version 1.2 assigns the controller that starts the round to **player one**, even when Android enumerates a passive input device first. A solo round started by touch adopts the first controller used. Additional controllers remain available for local players. Ordinary local controller play remains available. LAN multiplayer connects phones on the same network; it does not use an internet matchmaking server.
+
+## LAN multiplayer (v1.3)
+
+1. Install **v1.3 on every phone** and connect them to the same Wi-Fi.
+2. On one phone choose **LAN Multiplayer → Host**. Share the displayed Wi-Fi IPv4 address.
+3. On the other phones choose **LAN Multiplayer → Join** and enter that address.
+4. The host taps **Start match** once everyone has joined. Two to four phones are supported, one player per phone. The host is player one; the other phones get players two to four. A label identifies your player.
+
+The host's Mega Weapons setting applies to the room. Each phone can keep its own graphics and music choices. Existing touch controls, side action buttons, and controllers work for that phone's assigned player.
+
+Start or the touch Pause button pauses/resumes the shared match. Android Back or the controller Back/Select button leaves the room, ending the match for everyone. Keep every phone in the foreground: backgrounding a phone cancels its LAN session. After results or disconnection, host/join a new room for another round.
+
+The room uses direct TCP on port **39828**. No account, external server, or port forwarding is needed. Guest Wi-Fi/client isolation can block direct connections; use a network that allows devices to communicate. If several private IP addresses are listed (for example, with a VPN), use the phone's actual Wi-Fi address from Android network details.
+
+Inputs and random seeds are shared for every simulation step, with state checks detecting divergence. A slow phone slows the shared simulation; a timed-out or desynchronized match returns to the title rather than continuing with different game states. Ordinary local play is available through Start Game.
+
+### LAN validation
+
+Automated tests use independent native processes and real TCP sockets with the same gameplay update code as the APK:
+
+- Two-player and four-player matches with matching state hashes, movement and projectiles.
+- Shared pause/resume, game-over/winner flow, and return to title.
+- Disconnect and deliberate desynchronization handling.
+- Malformed packet sizes, incompatible versions, invalid slots, and truncated messages.
+- Quick touch Pause/results taps retained while the network waits.
+- Existing touch, controller assignment, and gameplay regressions.
+
+Physical Android-to-Android Wi-Fi testing has **not** been performed. LAN play is a preview. All peers must use this same APK. See `tests/lan-integration.log` and `tests/run_lan_integration.py` for the reproducible native checks.
 
 ## Build on Linux
 
@@ -36,7 +64,7 @@ export ANDROID_JAR=/path/to/android-sdk/platforms/android-35/android.jar
 ./build-android.sh
 ```
 
-The signed APK is written to `build-apk/DeadBabiesX-Android-v1.2.apk`. The script builds the C++ game and SDL, compiles the Android activity, bundles the assets and ARM64 libraries, aligns the package, signs it, and verifies the signature.
+The signed APK is written to `build-apk/DeadBabiesX-Android-v1.3-LAN.apk`. The script builds the C++ game and SDL, compiles the Android activity, bundles the assets and ARM64 libraries, aligns the package, signs it, and verifies the signature.
 
 A local development signing key is generated under `.local/signing/` unless `SIGNING_KEYSTORE` and `SIGNING_ALIAS` are provided. Passwords can be supplied with `DBX_STORE_PASSWORD` and `DBX_KEY_PASSWORD`; development defaults are `android`. Signing keys are excluded from Git. A self-built APK signed with your own key cannot update an installed preview signed by the maintainer without first uninstalling it, which removes local saves.
 
@@ -46,7 +74,7 @@ A local development signing key is generated under `.local/signing/` unless `SIG
 - `android/java/`: Android activity and SDL Java bindings.
 - `android/assets/`: packaged game assets, music, controller mappings, and dependency notices.
 - `android/AndroidManifest.xml`: Android package and version settings.
-- `tests/`: recorded checks from the v1.2 build.
+- `tests/`: recorded checks from the current build.
 
 Native ARM64 compilation, APK v2/v3 signing, 16 KB native-library alignment, touch hit targets at three aspect ratios, virtual-controller input, and gameplay self-tests passed. An integration test exercised the real gameplay update with a passive first device and an active second controller, including movement, aiming, projectiles, pause/resume, and touch-start controller adoption.
 

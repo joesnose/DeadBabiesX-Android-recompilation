@@ -6,3 +6,7 @@
 *.idsig
 
 /build-verification.log
+
+/build-lan.log
+/host-lan-build.log
+/host-lan-rebuild.log

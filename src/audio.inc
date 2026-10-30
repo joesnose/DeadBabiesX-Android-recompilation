@@ -176,7 +176,7 @@ float Sin(float a) { return std::sin(a * 0.017453292519943295f); }
 float Cos(float a) { return std::cos(a * 0.017453292519943295f); }
 float ATan2(float x, float y) { return std::atan2(x, y) * 57.29577951308232f; }
 float fAbs(float a) { return std::abs(a); }
-float Rand() { return float(rand()) / RAND_MAX; }
+float Rand() { return float(NativeGameRandom()) / 2147483648.f; }
 float Pow(float a, float b) { return std::pow(a, b); }
 float Sqrt(float a) { return std::sqrt(a); }
 

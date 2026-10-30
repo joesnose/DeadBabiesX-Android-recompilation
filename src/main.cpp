@@ -1,5 +1,6 @@
 #include "frontend.h"
 #include "game.h"
+#include "lan.h"
 #include <exception>
 #include <string>
 extern void ResetNativeRound();
@@ -12,6 +13,8 @@ int main(int argc,char**argv) {
  extern int NativeAndroidSelfTest();
  extern int NativeInputSelfTest();
  extern int NativeGameplayControllerSelfTest();
+ extern int NativeLanIntegrationTest(int,char**);
+ if(argc>1&&(std::string(argv[1])=="--lan-host"||std::string(argv[1])=="--lan-client"))return NativeLanIntegrationTest(argc,argv);
  if(argc>1&&std::string(argv[1])=="--gameplay-controller-test")return NativeGameplayControllerSelfTest();
  if(argc>1&&std::string(argv[1])=="--input-self-test")return NativeInputSelfTest();
  if(argc>1&&std::string(argv[1])=="--android-self-test")return NativeAndroidSelfTest();
@@ -31,8 +34,16 @@ int main(int argc,char**argv) {
     }
     bool resetTestDone = false;
     while (XEngine->Running()) {
+      LanConfig lanConfig;
+      if(!frontend.playing&&LanTakeReady(lanConfig)){
+        NativePrepareGameplayController(-1);SetStartingPlayers(lanConfig.players);SetMegaWeapons(lanConfig.mega);
+        XEngine->m_Ticks=0;XEngine->SetGameSpeed(1);
+        if(roundExists)ResetNativeRound();else{XEngine->StopAllSounds();Game.Init();roundExists=true;}
+        frontend.Play();continue;
+      }
       NativeSetTouchScene(frontend.playing, Game.m_ResultsReady);
       if (!frontend.playing) {
+        if(LanLobbyOpen()){frontend.Draw();XEngine->XUpdate();continue;}
         MenuAction action = frontend.Update();
         if (action == MenuAction::Exit) {
           fprintf(stderr, "MENU exit\n");
@@ -77,6 +88,20 @@ int main(int argc,char**argv) {
         continue;
       }
       NativeSetTouchScene(frontend.playing, Game.m_ResultsReady);
+      if(LanActive()){
+        if(XEngine->TakeMenuBack())LanCancel();
+        XEngine->GamePad[0]=NativeLanReadLocalInput();
+        bool networkPaused=false;
+        if(!LanExchange(XEngine->GamePad,LanGameHash(),networkPaused,NativeLanPump)){
+          std::string reason=LanStatus();LanStop();XEngine->StopAllSounds(false);XEngine->SetAudioPaused(false);XEngine->PlayMusic("music3.ogg");frontend.OpenTitle();
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,"LAN multiplayer",reason.c_str(),nullptr);continue;
+        }
+        if(networkPaused){XEngine->SetAudioPaused(true);Game.Refresh();XEngine->SetCameraPos(0,0);XEngine->FillRect(-20,-20,680,520,0,0,0,.65f);XEngine->DrawUiText("LAN PAUSED",320,210,28,255,230,180,true);XEngine->DrawUiText("START / PAUSE TO RESUME - BACK LEAVES ROOM",320,260,10,230,210,180,true);XEngine->XUpdate();continue;}
+        XEngine->SetAudioPaused(false);
+        bool ongoing=Game.Update()!=0;XEngine->m_Ticks+=XEngine->m_GameSpeed;
+        if(!ongoing){LanStop();XEngine->StopAllSounds(false);XEngine->PlayMusic("music3.ogg");frontend.OpenTitle();}
+        continue;
+      }
       if (frontend.WantsPause()) {
         frontend.OpenPause();
         continue;

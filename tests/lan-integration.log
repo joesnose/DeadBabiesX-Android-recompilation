@@ -1,0 +1,10 @@
+PASS: 2 players, normal, 600 frames
+PASS: 4 players, normal, 900 frames
+PASS: 2 players, results, 600 frames
+PASS: 2 players, desync, 60 frames
+PASS: 2 players, disconnect, 60 frames
+PASS: malformed peer rejected (packet size)
+PASS: malformed peer rejected (version)
+PASS: malformed peer rejected (assignment)
+PASS: malformed peer rejected (disconnected)
+LAN integration checks passed.

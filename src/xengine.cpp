@@ -1,5 +1,7 @@
 #include "xengine.h"
 #include "game.h"
+#include "lan.h"
+#include "sync_rng.h"
 #include "cartoon_shading.h"
 #include "cel_shading.h"
 #undef XInputSetState
@@ -24,6 +26,7 @@ static SDL_Window* window;
 #ifndef __ANDROID__
 static bool headlessInputTest=false;
 bool NativeIsHeadlessInputTest(){return headlessInputTest;}
+void NativeSetHeadlessInputTest(bool value){headlessInputTest=value;}
 #endif
 static SDL_GLContext context;
 static bool running=true,menuBack=false,background=false;
@@ -79,12 +82,14 @@ bool CXEngine::TakeMenuBack(){bool v=menuBack;menuBack=false;return v;}
 void CXEngine::ClearInputEdges(){menuBack=false;for(auto&p:GamePad){p.wPressedButtons=0;std::fill(std::begin(p.bPressedAnalogButtons),std::end(p.bPressedAnalogButtons),0);}}
 void CXEngine::SetAudioPaused(bool p){std::lock_guard<std::mutex>l(audioMutex);audioPaused=p;}
 #include "touch.inc"
+void NativeLanPump(){pollEvents();updatePads();if(XEngine->TakeMenuBack()||!XEngine->Running())LanCancel();}
 void CXEngine::XUpdate(){
 #ifndef __ANDROID__
- if(headlessInputTest){m_Ticks+=m_GameSpeed;m_SoundsPerFrame=16;pollEvents();updatePads();return;}
+ if(headlessInputTest){if(!LanActive())m_Ticks+=m_GameSpeed;m_SoundsPerFrame=16;pollEvents();updatePads();return;}
 #endif
+ if(LanActive()){char label[64];snprintf(label,sizeof(label),"LAN - YOU: PLAYER %d",LanPlayerSlot()+1);DrawUiText(label,320,472,9,235,215,165,true);}
  drawTouch();SDL_GL_SwapWindow(window);
- uint64_t now=SDL_GetPerformanceCounter(),freq=SDL_GetPerformanceFrequency();double dt=double(now-lastFrame)/freq;if(dt<1./60.)SDL_Delay((Uint32)((1./60.-dt)*1000));lastFrame=SDL_GetPerformanceCounter();m_Millisecs.QuadPart=lastFrame;m_Ticks+=m_GameSpeed;m_SoundsPerFrame=16;
+ uint64_t now=SDL_GetPerformanceCounter(),freq=SDL_GetPerformanceFrequency();double dt=double(now-lastFrame)/freq;if(dt<1./60.)SDL_Delay((Uint32)((1./60.-dt)*1000));lastFrame=SDL_GetPerformanceCounter();m_Millisecs.QuadPart=lastFrame;if(!LanActive())m_Ticks+=m_GameSpeed;m_SoundsPerFrame=16;
  pollEvents();updatePads();prepareFrame();
  if(const char*s=getenv("DBX_TEST_SECONDS"))if(SDL_GetTicks64()>atof(s)*1000)running=false;
 }
@@ -301,7 +306,7 @@ void CXEngine::DisableMotionBlur() {}
 void CXEngine::RenderMotionBlur(float) {}
 void CXEngine::SetGameSpeed(float speed) { m_GameSpeed = std::max(0.f, speed); }
 void NativeRumble(HANDLE,PadFeedback*){}
-void CXEngine::Shutdown(){NativeStopAudio();for(auto&c:controllers)if(c){SDL_GameControllerClose(c);c=nullptr;}textures.clear();SDL_GL_DeleteContext(context);SDL_DestroyWindow(window);SDL_Quit();}
+void CXEngine::Shutdown(){LanStop();NativeStopAudio();for(auto&c:controllers)if(c){SDL_GameControllerClose(c);c=nullptr;}textures.clear();SDL_GL_DeleteContext(context);SDL_DestroyWindow(window);SDL_Quit();}
 #ifndef __ANDROID__
 #include "frontend.h"
 static void capture(const char*name){std::vector<unsigned char>p((size_t)viewportW*viewportH*4);glReadPixels(0,0,viewportW,viewportH,GL_RGBA,GL_UNSIGNED_BYTE,p.data());FILE*f=fopen(name,"wb");fprintf(f,"P6\n%d %d\n255\n",viewportW,viewportH);for(int y=viewportH-1;y>=0;y--)for(int x=0;x<viewportW;x++)fwrite(&p[((size_t)y*viewportW+x)*4],1,3,f);fclose(f);}
@@ -312,7 +317,7 @@ int NativeAndroidSelfTest(){
  // Real SDL finger events pass through the production pump and touch mapping.
  auto touch=[&](SDL_FingerID id,float x,float y,int type){SDL_Event e{};e.type=type;e.tfinger.fingerId=id;e.tfinger.x=x;e.tfinger.y=y;SDL_PushEvent(&e);pollEvents();updatePads();};
  auto tap=[&](float gx,float gy){float x=(view.x+(gx+20)*view.w/680.f)/viewportW,y=(view.y+(gy+20)*view.h/520.f)/viewportH;touch(50,x,y,SDL_FINGERDOWN);touch(50,x,y,SDL_FINGERUP);};
- for(int row=1;row<6;row++){tap(300,170+row*35+10);check(NativeTakeMenuTap(false)==row,"touch menu row at viewport offset");}
+ for(int row=1;row<6;row++){tap(300,170+row*31+10);check(NativeTakeMenuTap(false)==row,"touch menu row at viewport offset");}
  tap(300,180);check(f.Update()==MenuAction::Start,"tap Start uses existing menu action");
  SetStartingPlayers(1);Game.Init();f.Play();NativeSetTouchScene(true,false);
  touch(1,.18f,.76f,SDL_FINGERDOWN);touch(2,.94f,.65f,SDL_FINGERDOWN);
