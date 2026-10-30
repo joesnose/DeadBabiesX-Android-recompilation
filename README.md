@@ -1,5 +1,5 @@
 # DeadBabiesX-Android-recompilation
-This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was able to find the source code and get AI to recompile it for android. This is 100% AI generated. Its a great retro vibed game that i always loved on Xbox, a few option have been added but it remains basically the same.
+This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was able to find the source code and get AI to recompile it for android. This is 100% AI generated. Its a great retro vibed game that i always loved on Xbox, a few option have been added but it remains basically the same. 4 player was great but have not tested it on android yet.
 
 Native Android port of Dead Babies Xtreme, with touch controls, controller support, selectable graphics themes, and music. Based on the original game by Chris Friesen and contributors.
 
