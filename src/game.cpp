@@ -52,7 +52,7 @@ static CPlayer *OwnPlayer() {
   ownedPlayers.push_back(std::move(p));
   return out;
 }
-void ResetNativeRound() {
+void ReleaseNativeRound() {
   for (auto *p : Game.m_BabyList)
     delete p;
   Game.m_BabyList.clear();
@@ -122,6 +122,9 @@ void ResetNativeRound() {
   Game = CGame{};
   XEngine->StopAllSounds();
   XEngine->SetGameSpeed(1);
+}
+void ResetNativeRound(){
+  ReleaseNativeRound();
   Game.Init();
 }
 

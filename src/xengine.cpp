@@ -62,7 +62,10 @@ static void applyViewport(){SDL_GL_GetDrawableSize(window,&viewportW,&viewportH)
 static void prepareFrame(){applyViewport();glClearColor(0,0,0,1);glClear(GL_COLOR_BUFFER_BIT);glMatrixMode(GL_PROJECTION);glLoadIdentity();glOrtho(-20,660,500,-20,-1,1);glMatrixMode(GL_MODELVIEW);glLoadIdentity();}
 static void initControllers();
 static void makeFont(){int w,h,n;auto*b=stbi_load("font.png",&w,&h,&n,4);if(!b)throw std::runtime_error("Font asset missing");glGenTextures(1,&fontTexture);glBindTexture(GL_TEXTURE_2D,fontTexture);glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w,h,0,GL_RGBA,GL_UNSIGNED_BYTE,b);stbi_image_free(b);glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);}
+static void resetRuntimeState();
+extern void ReleaseNativeRound();
 void CXEngine::XInit(){
+ resetRuntimeState();
  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO|SDL_INIT_GAMECONTROLLER))throw std::runtime_error(SDL_GetError());
 #ifdef __ANDROID__
  chdir(SDL_AndroidGetInternalStoragePath());
@@ -306,7 +309,7 @@ void CXEngine::DisableMotionBlur() {}
 void CXEngine::RenderMotionBlur(float) {}
 void CXEngine::SetGameSpeed(float speed) { m_GameSpeed = std::max(0.f, speed); }
 void NativeRumble(HANDLE,PadFeedback*){}
-void CXEngine::Shutdown(){LanStop();NativeStopAudio();for(auto&c:controllers)if(c){SDL_GameControllerClose(c);c=nullptr;}textures.clear();SDL_GL_DeleteContext(context);SDL_DestroyWindow(window);SDL_Quit();}
+void CXEngine::Shutdown(){running=false;LanStop();NativeStopAudio();ReleaseNativeRound();for(auto&c:controllers)if(c){SDL_GameControllerClose(c);c=nullptr;}textures.clear();if(context)SDL_GL_DeleteContext(context);context=nullptr;if(window)SDL_DestroyWindow(window);window=nullptr;fontTexture=0;SDL_Quit();}
 #ifndef __ANDROID__
 #include "frontend.h"
 static void capture(const char*name){std::vector<unsigned char>p((size_t)viewportW*viewportH*4);glReadPixels(0,0,viewportW,viewportH,GL_RGBA,GL_UNSIGNED_BYTE,p.data());FILE*f=fopen(name,"wb");fprintf(f,"P6\n%d %d\n255\n",viewportW,viewportH);for(int y=viewportH-1;y>=0;y--)for(int x=0;x<viewportW;x++)fwrite(&p[((size_t)y*viewportW+x)*4],1,3,f);fclose(f);}
@@ -394,5 +397,32 @@ int NativeGameplayControllerSelfTest(){
  axis(SDL_CONTROLLER_AXIS_LEFTX,0);std::swap(controllers[0],controllers[1]);lastMenuController=-1;NativePrepareGameplayController(-1);start=p->m_PlayerPos.x;
  axis(SDL_CONTROLLER_AXIS_LEFTX,24000);Game.Update();check(controllers[0]==c&&p->m_PlayerPos.x>start,"touch-started solo round adopts active controller as player one");
  XEngine->StopAllSounds();SDL_JoystickDetachVirtual(active);SDL_JoystickDetachVirtual(passive);pollEvents();SDL_Quit();fprintf(stderr,"GAMEPLAY CONTROLLER TESTS: %d failures\n",failures);return failures?1:0;
+}
+#endif
+
+// Android can call SDL_main again in the same process after Activity recreation.
+// Static initialization does not run again, so each launch must reset native state.
+static void resetRuntimeState(){
+ LanStop();NativeStopAudio();ReleaseNativeRound();
+ running=true;menuBack=false;background=false;lastFrame=0;
+ XEngine->m_Ticks=0;XEngine->m_GameSpeed=1;XEngine->m_Millisecs.QuadPart=0;XEngine->m_SoundsPerFrame=16;
+ XEngine->SetCameraPos(0,0);resetTouches();touchPlaying=false;touchResults=false;
+ lastMenuController=-1;awaitingSoloController=false;lanLocalInput=XBGAMEPAD{};lanButtonLatch=0;lanAnalogLatch=0;
+ textures.clear();fontTexture=0;artOverride=-1;
+ {std::lock_guard<std::mutex>lock(audioMutex);voices.clear();tokens.clear();nextVoice=1;musicVoiceId=0;musicChoice=0;musicPaused=false;audioPaused=false;musicVolume=1000;}
+}
+#ifndef __ANDROID__
+int NativeRelaunchSelfTest(){
+ headlessInputTest=true;int failures=0;
+ auto check=[&](bool ok,const char*name){fprintf(stderr,"%s: %s\n",ok?"PASS":"FAIL",name);failures+=!ok;};
+ for(int launch=0;launch<3;launch++){
+  resetRuntimeState();check(XEngine->Running(),"new launch clears exit flag");check(!menuBack&&!background&&fingers.empty(),"new launch clears background and input flags");
+  check(Game.m_PlayerList.empty()&&Game.m_NumPlayers==0&&textures.empty()&&voices.empty()&&tokens.empty(),"new launch has no old round/resources");
+  SDL_Init(SDL_INIT_GAMECONTROLLER|SDL_INIT_EVENTS);SetStartingPlayers(1);Game.Init();auto*p=Game.m_PlayerList.front();p->m_PlayerPos.x=200;
+  XEngine->GamePad[0].fX1=1;Game.Update();check(p->m_PlayerPos.x>200,"actual gameplay runs after launch");
+  NativeSetTouchScene(true,false);fingerEvent(1,.14f,.76f,SDL_FINGERDOWN);menuBack=true;background=true;XEngine->RequestExit();check(!XEngine->Running(),"Exit Game stops current launch");
+  XEngine->Shutdown();check(Game.m_PlayerList.empty()&&textures.empty()&&tokens.empty(),"shutdown releases round, textures and channels");
+ }
+ resetRuntimeState();fprintf(stderr,"RELAUNCH TESTS: %d failures\n",failures);return failures?1:0;
 }
 #endif

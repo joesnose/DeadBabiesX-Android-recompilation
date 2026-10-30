@@ -10,3 +10,5 @@
 /build-lan.log
 /host-lan-build.log
 /host-lan-rebuild.log
+
+/relaunch-build.log

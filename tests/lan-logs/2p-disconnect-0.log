@@ -1,4 +1,4 @@
-READY slot=0 players=2 mega=1 seed=2801842801
+READY slot=0 players=2 mega=1 seed=2804873087
 ART hd: game/hd/data/backgrounds/train_bg1.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg2.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
@@ -77,5 +77,5 @@ MUSIC selected ORIGINAL
 GAME players started: 2
 GAME weapon level cap: 5
 PASS: touch pause/results taps survive network polling
-FRAME 0 HASH 985c462f3c867eb5
+FRAME 0 HASH 7e4bd37344ca8329
 EXCHANGE END: A player disconnected from the LAN game

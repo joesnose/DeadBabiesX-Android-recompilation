@@ -12,6 +12,8 @@ int main(int argc,char**argv) {
 #ifndef __ANDROID__
  extern int NativeAndroidSelfTest();
  extern int NativeInputSelfTest();
+ extern int NativeRelaunchSelfTest();
+ if(argc>1&&std::string(argv[1])=="--relaunch-self-test")return NativeRelaunchSelfTest();
  extern int NativeGameplayControllerSelfTest();
  extern int NativeLanIntegrationTest(int,char**);
  if(argc>1&&(std::string(argv[1])=="--lan-host"||std::string(argv[1])=="--lan-client"))return NativeLanIntegrationTest(argc,argv);
@@ -129,7 +131,7 @@ int main(int argc,char**argv) {
     XEngine->Shutdown();
     return 0;
   } catch (const std::exception &e) {
-    NativeStopAudio();
+    XEngine->Shutdown();
     fprintf(stderr, "FATAL: %s\n", e.what());
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Dead Babies X",e.what(),nullptr);
     return 1;

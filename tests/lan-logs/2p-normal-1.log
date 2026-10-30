@@ -1,4 +1,4 @@
-READY slot=1 players=2 mega=1 seed=2801840102
+READY slot=1 players=2 mega=1 seed=2804869057
 ART hd: game/hd/data/backgrounds/train_bg1.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg2.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
@@ -77,14 +77,14 @@ MUSIC selected ORIGINAL
 GAME players started: 2
 GAME weapon level cap: 5
 PASS: touch pause/results taps survive network polling
-FRAME 0 HASH a1b1cd040973bce0
-FRAME 60 HASH e0b4886025ea69d2
-FRAME 120 HASH 95571a151a8c0f9b
-FRAME 180 HASH 02bfcc16988c49bb
-FRAME 240 HASH 78d4733bbfef0710
-FRAME 300 HASH 7f8d0a8f937501d9
-FRAME 360 HASH ee819a8c2f574e18
-FRAME 420 HASH fe928c5d5ed6b6a0
-FRAME 480 HASH 6b7dba4d480ac7a5
-FRAME 540 HASH bd5045d8d5221b66
-LAN MATCH PASS slot=1 ticks=590.0 paused=1 resumed=1 projectiles=1 hash=610e41e620e553d5
+FRAME 0 HASH 031a4f33b140b51c
+FRAME 60 HASH 9ccf903d45ae5e32
+FRAME 120 HASH 55df11fc99f3704c
+FRAME 180 HASH 81b0d289316e187d
+FRAME 240 HASH 90078323cd4f0240
+FRAME 300 HASH 52e76f24addcd27b
+FRAME 360 HASH f1d433ebf0f9871c
+FRAME 420 HASH ce9b8c942f3d6ef6
+FRAME 480 HASH 9109dc3b9d8b2a68
+FRAME 540 HASH 328e54c0ca2c6931
+LAN MATCH PASS slot=1 ticks=590.0 paused=1 resumed=1 projectiles=1 hash=6c989ea20a589fd3

@@ -3,9 +3,9 @@ This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was
 
 Native Android port of Dead Babies Xtreme, with touch controls, controller support, selectable graphics themes, and music. Based on the original game by Chris Friesen and contributors.
 
-**[Download Android v1.3 LAN APK](downloads/DeadBabiesX-Android-v1.3-LAN.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
+**[Download Android v1.3.1 LAN APK](downloads/DeadBabiesX-Android-v1.3.1-LAN.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
 
-Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.3 installs over the previous Android preview builds and keeps the high score.
+Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.3.1 installs over the previous Android preview builds and keeps the high score.
 
 ## Controls
 
@@ -24,9 +24,13 @@ Touch menus by tapping a row. Pickup and SP1 are on the left side; Alt and SP2 a
 
 Version 1.2 assigns the controller that starts the round to **player one**, even when Android enumerates a passive input device first. A solo round started by touch adopts the first controller used. Additional controllers remain available for local players. Ordinary local controller play remains available. LAN multiplayer connects phones on the same network; it does not use an internet matchmaking server.
 
+## v1.3.1 relaunch fix
+
+Fixed Exit Game preventing a second launch while Android keeps the app process alive. Every native launch now resets the exit/background flags, input, round ownership, texture cache and audio channels. Shutdown also releases round resources. A regression test exits and starts gameplay three times in the same process. Install this update over v1.3; no uninstall or data clearing is needed. Physical-device relaunch confirmation remains necessary.
+
 ## LAN multiplayer (v1.3)
 
-1. Install **v1.3 on every phone** and connect them to the same Wi-Fi.
+1. Install **v1.3.1 on every phone** and connect them to the same Wi-Fi.
 2. On one phone choose **LAN Multiplayer → Host**. Share the displayed Wi-Fi IPv4 address.
 3. On the other phones choose **LAN Multiplayer → Join** and enter that address.
 4. The host taps **Start match** once everyone has joined. Two to four phones are supported, one player per phone. The host is player one; the other phones get players two to four. A label identifies your player.
@@ -64,7 +68,7 @@ export ANDROID_JAR=/path/to/android-sdk/platforms/android-35/android.jar
 ./build-android.sh
 ```
 
-The signed APK is written to `build-apk/DeadBabiesX-Android-v1.3-LAN.apk`. The script builds the C++ game and SDL, compiles the Android activity, bundles the assets and ARM64 libraries, aligns the package, signs it, and verifies the signature.
+The signed APK is written to `build-apk/DeadBabiesX-Android-v1.3.1-LAN.apk`. The script builds the C++ game and SDL, compiles the Android activity, bundles the assets and ARM64 libraries, aligns the package, signs it, and verifies the signature.
 
 A local development signing key is generated under `.local/signing/` unless `SIGNING_KEYSTORE` and `SIGNING_ALIAS` are provided. Passwords can be supplied with `DBX_STORE_PASSWORD` and `DBX_KEY_PASSWORD`; development defaults are `android`. Signing keys are excluded from Git. A self-built APK signed with your own key cannot update an installed preview signed by the maintainer without first uninstalling it, which removes local saves.
 

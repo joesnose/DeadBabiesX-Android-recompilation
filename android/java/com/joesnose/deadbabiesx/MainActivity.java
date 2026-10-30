@@ -34,6 +34,7 @@ public class MainActivity extends SDLActivity {
  private Runnable lanPoll;
  private boolean lanLoaded=false;
  public void showLanSetup(final boolean mega){runOnUiThread(()->{
+  if(isFinishing()||isDestroyed())return;
   lanLoaded=true;
   new AlertDialog.Builder(this).setTitle("LAN multiplayer")
    .setMessage("Connect every phone to the same Wi-Fi and install the same game version. One phone hosts; the others join its Wi-Fi IP. Up to four phones. A guest Wi-Fi network may block phones from connecting to each other.")
@@ -61,7 +62,7 @@ public class MainActivity extends SDLActivity {
   lanHandler.post(lanPoll);
  }
  @Override protected void onPause(){if(lanLoaded)lanCancel();super.onPause();}
- @Override protected void onDestroy(){if(lanLoaded)lanCancel();if(lanPoll!=null)lanHandler.removeCallbacks(lanPoll);super.onDestroy();}
+ @Override protected void onDestroy(){if(lanLoaded)lanCancel();if(lanPoll!=null)lanHandler.removeCallbacks(lanPoll);if(lanDialog!=null){lanDialog.dismiss();lanDialog=null;}super.onDestroy();}
  private void copyAsset(String path,File target)throws IOException{
   String[] list=getAssets().list(path);
   if(list!=null&&list.length>0){if(!target.isDirectory()&&!target.mkdirs())throw new IOException("Cannot create game folder");for(String name:list)copyAsset(path.isEmpty()?name:path+"/"+name,new File(target,name));}

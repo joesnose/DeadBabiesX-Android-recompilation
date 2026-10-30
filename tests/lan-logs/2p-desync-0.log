@@ -1,4 +1,4 @@
-READY slot=0 players=2 mega=1 seed=2801843927
+READY slot=0 players=2 mega=1 seed=2804870112
 ART hd: game/hd/data/backgrounds/train_bg1.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg2.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
@@ -77,5 +77,5 @@ MUSIC selected ORIGINAL
 GAME players started: 2
 GAME weapon level cap: 5
 PASS: touch pause/results taps survive network polling
-FRAME 0 HASH b837fb99be78494e
+FRAME 0 HASH 724d6827e022b4b5
 EXCHANGE END: LAN simulation lost sync. Rehost the room.
