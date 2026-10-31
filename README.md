@@ -3,9 +3,9 @@ This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was
 
 Native Android port of Dead Babies Xtreme, with touch controls, controller support, selectable graphics themes, and music. Based on the original game by Chris Friesen and contributors.
 
-**[Download Android v1.4 LAN APK](downloads/DeadBabiesX-Android-v1.4-LAN.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
+**[Download Android v1.5 LAN APK](downloads/DeadBabiesX-Android-v1.5-LAN.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
 
-Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.4 installs over the previous Android preview builds and keeps the high score.
+Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.5 installs over the previous Android preview builds and keeps the high score.
 
 ## Controls
 
@@ -24,9 +24,19 @@ Touch menus by tapping a row. Pickup and SP1 are on the left side; Alt and SP2 a
 
 Version 1.2 assigns the controller that starts the round to **player one**, even when Android enumerates a passive input device first. A solo round started by touch adopts the first controller used. Additional controllers remain available for local players. Ordinary local controller play remains available. LAN multiplayer connects phones on the same network; it does not use an internet matchmaking server.
 
+## v1.5 pause menu and connected rematches
+
+- **Start** (or the mapped Pause action) opens a shared LAN pause menu with **Resume** and **Exit Game**. Resume can also use Start/B/Back; touch and controller navigation are supported.
+- **Exit Game on a pause menu returns to the main menu**, keeping the app open. During LAN play this ends the room for everyone. Exit Game on the main menu still closes the app.
+- Once results finish revealing, connected LAN players can choose **Play Again** or **Main Menu**. Any player may select/confirm the shared choice with touch or a controller.
+- **Play Again keeps the room, connections, player assignments, and Mega Weapons setting**, resets scores/lives/weapons, and starts a new randomized round. No IP re-entry or rejoining is required.
+- Start/Back pauses during gameplay; Back at final results returns the room to the main menu. Real disconnections still end the match.
+
+All phones must use **v1.5**. Automated checks cover the offline pause Exit action, LAN pause touch targets, two- and four-player rematches over the same TCP sessions, fresh round seeds, continued synchronized gameplay after replay, and graceful shared return to the title. Physical-phone confirmation remains necessary.
+
 ## v1.4 LAN stability and controller mapping
 
-LAN simulation now uses explicit deterministic trigonometry, vector normalization, and square root rather than device-dependent math-library results. ARM64 floating-point rounding, denormal handling, and NaN behavior are standardized before simulation updates. This addresses a source of exact-state mismatches across different Android devices; strict sync checks remain enabled. All phones must install v1.4 because its LAN protocol is incompatible with earlier previews. Physical-device confirmation is still needed.
+LAN simulation now uses explicit deterministic trigonometry, vector normalization, and square root rather than device-dependent math-library results. ARM64 floating-point rounding, denormal handling, and NaN behavior are standardized before simulation updates. This addresses a source of exact-state mismatches across different Android devices; strict sync checks remain enabled. v1.4 introduced a new LAN protocol; for current play, all phones must install v1.5. Physical-device confirmation is still needed.
 
 ### Physical controller mapping
 
@@ -49,14 +59,14 @@ Fixed Exit Game preventing a second launch while Android keeps the app process a
 
 ## LAN multiplayer (v1.3)
 
-1. Install **v1.4 on every phone** and connect them to the same Wi-Fi.
+1. Install **v1.5 on every phone** and connect them to the same Wi-Fi.
 2. On one phone choose **LAN Multiplayer → Host**. Share the displayed Wi-Fi IPv4 address.
 3. On the other phones choose **LAN Multiplayer → Join** and enter that address.
 4. The host taps **Start match** once everyone has joined. Two to four phones are supported, one player per phone. The host is player one; the other phones get players two to four. A label identifies your player.
 
 The host's Mega Weapons setting applies to the room. Each phone can keep its own graphics and music choices. Existing touch controls, side action buttons, and controllers work for that phone's assigned player.
 
-Start or the touch Pause button pauses/resumes the shared match. Android Back or the controller Back/Select button leaves the room, ending the match for everyone. Keep every phone in the foreground: backgrounding a phone cancels its LAN session. After results or disconnection, host/join a new room for another round.
+Start or the touch Pause button opens the shared pause menu. Choose Resume to continue or Exit Game to return everyone to the main menu. Android Back or controller Back/Select opens/resumes pause during play. At final results, Play Again starts a new round using the same connections. Main Menu ends the room. Keep every phone in the foreground: backgrounding a phone cancels its LAN session. Rehost/rejoin is only needed after leaving or losing the room.
 
 The room uses direct TCP on port **39828**. No account, external server, or port forwarding is needed. Guest Wi-Fi/client isolation can block direct connections; use a network that allows devices to communicate. If several private IP addresses are listed (for example, with a VPN), use the phone's actual Wi-Fi address from Android network details.
 
@@ -87,7 +97,7 @@ export ANDROID_JAR=/path/to/android-sdk/platforms/android-35/android.jar
 ./build-android.sh
 ```
 
-The signed APK is written to `build-apk/DeadBabiesX-Android-v1.4-LAN.apk`. The script builds the C++ game and SDL, compiles the Android activity, bundles the assets and ARM64 libraries, aligns the package, signs it, and verifies the signature.
+The signed APK is written to `build-apk/DeadBabiesX-Android-v1.5-LAN.apk`. The script builds the C++ game and SDL, compiles the Android activity, bundles the assets and ARM64 libraries, aligns the package, signs it, and verifies the signature.
 
 A local development signing key is generated under `.local/signing/` unless `SIGNING_KEYSTORE` and `SIGNING_ALIAS` are provided. Passwords can be supplied with `DBX_STORE_PASSWORD` and `DBX_KEY_PASSWORD`; development defaults are `android`. Signing keys are excluded from Git. A self-built APK signed with your own key cannot update an installed preview signed by the maintainer without first uninstalling it, which removes local saves.
 

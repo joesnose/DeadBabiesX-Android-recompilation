@@ -156,3 +156,10 @@ XBGAMEPAD NativeLanReadLocalInput();
 #ifndef __ANDROID__
 bool NativeLanLatchSelfTest();
 #endif
+
+void NativeLanRequestBack();
+void NativeLanDrawMenu();
+
+#ifndef __ANDROID__
+bool NativeLanMenuTouchSelfTest();
+#endif

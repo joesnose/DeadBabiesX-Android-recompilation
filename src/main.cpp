@@ -15,6 +15,8 @@ int main(int argc,char**argv) {
  if(argc>1&&std::string(argv[1])=="--controller-map-test")return ControllerMapSelfTest();
  extern int NativeInputSelfTest();
  extern int NativeRelaunchSelfTest();
+ extern int NativePauseMenuSelfTest();
+ if(argc>1&&std::string(argv[1])=="--pause-menu-test")return NativePauseMenuSelfTest();
  if(argc>1&&std::string(argv[1])=="--relaunch-self-test")return NativeRelaunchSelfTest();
  extern int NativeGameplayControllerSelfTest();
  extern int NativeLanIntegrationTest(int,char**);
@@ -96,14 +98,17 @@ int main(int argc,char**argv) {
       }
       NativeSetTouchScene(frontend.playing, Game.m_ResultsReady);
       if(LanActive()){
-        if(XEngine->TakeMenuBack())LanCancel();
+        if(XEngine->TakeMenuBack())NativeLanRequestBack();
         XEngine->GamePad[0]=NativeLanReadLocalInput();
         bool networkPaused=false;
         if(!LanExchange(XEngine->GamePad,LanGameHash(),networkPaused,NativeLanPump)){
           std::string reason=LanStatus();LanStop();XEngine->StopAllSounds(false);XEngine->SetAudioPaused(false);XEngine->PlayMusic("music3.ogg");frontend.OpenTitle();
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,"LAN multiplayer",reason.c_str(),nullptr);continue;
         }
-        if(networkPaused){XEngine->SetAudioPaused(true);Game.Refresh();XEngine->SetCameraPos(0,0);XEngine->FillRect(-20,-20,680,520,0,0,0,.65f);XEngine->DrawUiText("LAN PAUSED",320,210,28,255,230,180,true);XEngine->DrawUiText("START / PAUSE TO RESUME - BACK LEAVES ROOM",320,260,10,230,210,180,true);XEngine->XUpdate();continue;}
+        LanAction sessionAction=LanTakeAction();
+        if(sessionAction==LanAction::MainMenu){LanStop();XEngine->StopAllSounds(false);XEngine->SetAudioPaused(false);XEngine->PlayMusic("music3.ogg");frontend.OpenTitle();continue;}
+        if(sessionAction==LanAction::PlayAgain){XEngine->m_Ticks=0;XEngine->SetGameSpeed(1);ResetNativeRound();frontend.Play();continue;}
+        if(networkPaused){XEngine->SetAudioPaused(true);Game.Refresh();XEngine->XUpdate();continue;}
         XEngine->SetAudioPaused(false);
         bool ongoing=Game.Update()!=0;XEngine->m_Ticks+=XEngine->m_GameSpeed;
         if(!ongoing){LanStop();XEngine->StopAllSounds(false);XEngine->PlayMusic("music3.ogg");frontend.OpenTitle();}

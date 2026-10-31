@@ -25,7 +25,8 @@ def match(players,frames,mode):
    hashes=[re.findall(r'FRAME (\d+) HASH (\w+)',t) for t in texts]
    assert all(h==hashes[0] for h in hashes),'Different game states on independent peers'
    assert all('paused=1 resumed=1 projectiles=1' in t for t in texts)
-  if mode=='results':assert all('RESULTS RETURN SYNCHRONIZED' in t for t in texts)
+  if mode=='results':assert all('RESULTS REMATCH SYNCHRONIZED' in t and 'PAUSE EXIT TO MAIN MENU: PASS' in t for t in texts)
+  if mode=='pauseexit':assert all('PAUSE EXIT TO MAIN MENU: PASS' in t for t in texts)
   print(f'PASS: {players} players, {mode}, {frames} frames',flush=True)
  finally:
   for p in procs:
@@ -34,16 +35,18 @@ def match(players,frames,mode):
   for f in files:f.close()
 match(2,14400,'normal')
 match(4,7200,'normal')
-match(2,600,'results')
+match(2,800,'results')
+match(4,800,'results')
+match(2,120,'pauseexit')
 match(2,60,'desync')
 match(2,60,'disconnect')
 # An intentionally malformed peer must fail before allocating unbounded data or starting play.
 import socket,struct,threading
 for expected,payload,length,version in [
- ('packet size',b'',129,0x00010401),
- ('version',b'',None,0x00010402),
- ('assignment',b'bad-slot',None,0x00010401),
- ('disconnected',b'truncate',None,0x00010401),
+ ('packet size',b'',129,0x00010501),
+ ('version',b'',None,0x00010502),
+ ('assignment',b'bad-slot',None,0x00010501),
+ ('disconnected',b'truncate',None,0x00010501),
 ]:
  listener=socket.socket();listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);listener.bind(('127.0.0.1',39828));listener.listen(1);listener.settimeout(8)
  f=open(logs/('reject-'+expected.replace(' ','-')+'.log'),'w')

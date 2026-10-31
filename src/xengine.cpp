@@ -87,13 +87,13 @@ bool CXEngine::TakeMenuBack(){bool v=menuBack;menuBack=false;return v;}
 void CXEngine::ClearInputEdges(){menuBack=false;for(auto&p:GamePad){p.wPressedButtons=0;std::fill(std::begin(p.bPressedAnalogButtons),std::end(p.bPressedAnalogButtons),0);}}
 void CXEngine::SetAudioPaused(bool p){std::lock_guard<std::mutex>l(audioMutex);audioPaused=p;}
 #include "touch.inc"
-void NativeLanPump(){pollEvents();updatePads();if(XEngine->TakeMenuBack()||!XEngine->Running())LanCancel();}
+void NativeLanPump(){pollEvents();if(XEngine->TakeMenuBack())NativeLanRequestBack();else updatePads();if(!XEngine->Running())LanCancel();}
 void CXEngine::XUpdate(){
 #ifndef __ANDROID__
  if(headlessInputTest){if(!LanActive())m_Ticks+=m_GameSpeed;m_SoundsPerFrame=16;pollEvents();updatePads();return;}
 #endif
- if(LanActive()){char label[64];snprintf(label,sizeof(label),"LAN - YOU: PLAYER %d",LanPlayerSlot()+1);DrawUiText(label,320,472,9,235,215,165,true);}
- drawTouch();SDL_GL_SwapWindow(window);
+ if(LanActive()){char label[64];snprintf(label,sizeof(label),"LAN - YOU: PLAYER %d",LanPlayerSlot()+1);DrawUiText(label,320,480,9,235,215,165,true);}
+ NativeLanDrawMenu();drawTouch();SDL_GL_SwapWindow(window);
  uint64_t now=SDL_GetPerformanceCounter(),freq=SDL_GetPerformanceFrequency();double dt=double(now-lastFrame)/freq;if(dt<1./60.)SDL_Delay((Uint32)((1./60.-dt)*1000));lastFrame=SDL_GetPerformanceCounter();m_Millisecs.QuadPart=lastFrame;if(!LanActive())m_Ticks+=m_GameSpeed;m_SoundsPerFrame=16;
  pollEvents();updatePads();prepareFrame();
  if(const char*s=getenv("DBX_TEST_SECONDS"))if(SDL_GetTicks64()>atof(s)*1000)running=false;
@@ -427,4 +427,12 @@ int NativeRelaunchSelfTest(){
  }
  resetRuntimeState();fprintf(stderr,"RELAUNCH TESTS: %d failures\n",failures);return failures?1:0;
 }
+#endif
+
+#ifndef __ANDROID__
+int NativePauseMenuSelfTest(){headlessInputTest=true;for(auto&p:XEngine->GamePad)p=XBGAMEPAD{};auto&p=XEngine->GamePad[0];p.hDevice=(void*)1;Frontend f;f.OpenPause();f.Update();for(int i=0;i<3;i++){p.wPressedButtons=p.wButtons=2;f.Update();p.wPressedButtons=p.wButtons=0;f.Update();}p.bPressedAnalogButtons[0]=1;auto action=f.Update();bool ok=action==MenuAction::Title&&XEngine->Running();fprintf(stderr,"PAUSE EXIT RETURNS TO MAIN MENU: %s\n",ok?"PASS":"FAIL");return ok?0:1;}
+#endif
+
+#ifndef __ANDROID__
+bool NativeLanMenuTouchSelfTest(){auto saved=view;int oldW=viewportW,oldH=viewportH;viewportW=960;viewportH=720;view={0,0,960,720};fingerEvent(91,.5f,241.f/520,SDL_FINGERDOWN);updatePads();auto resume=NativeLanReadLocalInput();fingerEvent(91,.5f,241.f/520,SDL_FINGERUP);fingerEvent(92,.5f,297.f/520,SDL_FINGERDOWN);updatePads();auto exit=NativeLanReadLocalInput();fingerEvent(92,.5f,297.f/520,SDL_FINGERUP);view=saved;viewportW=oldW;viewportH=oldH;return (resume.wButtons&64)&&!(resume.wButtons&128)&&(exit.wButtons&128)&&!(exit.wButtons&64);}
 #endif

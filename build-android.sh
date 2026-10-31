@@ -39,7 +39,7 @@ if [ ! -f "$SIGNING_KEYSTORE" ]; then
  mkdir -p "$(dirname "$SIGNING_KEYSTORE")"
  keytool -genkeypair -keystore "$SIGNING_KEYSTORE" -storepass:env DBX_STORE_PASSWORD -keypass:env DBX_KEY_PASSWORD -alias "$SIGNING_ALIAS" -keyalg RSA -keysize 3072 -validity 10000 -dname 'CN=DeadBabiesX Android Development'
 fi
-OUTPUT_APK=build-apk/DeadBabiesX-Android-v1.4-LAN.apk
+OUTPUT_APK=build-apk/DeadBabiesX-Android-v1.5-LAN.apk
 "$BUILD_TOOLS_DIR/apksigner" sign --ks "$SIGNING_KEYSTORE" --ks-key-alias "$SIGNING_ALIAS" --ks-pass env:DBX_STORE_PASSWORD --key-pass env:DBX_KEY_PASSWORD --out "$OUTPUT_APK" build-apk/aligned.apk
 "$BUILD_TOOLS_DIR/apksigner" verify --verbose "$OUTPUT_APK"
 "$BUILD_TOOLS_DIR/zipalign" -c -P 16 4 "$OUTPUT_APK"

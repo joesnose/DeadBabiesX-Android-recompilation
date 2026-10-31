@@ -1,4 +1,4 @@
-READY slot=1 players=2 mega=1 seed=2799304644
+READY slot=1 players=2 mega=1 seed=2801229525
 ART hd: game/hd/data/backgrounds/train_bg1.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg2.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
@@ -77,19 +77,25 @@ MUSIC selected ORIGINAL
 GAME players started: 2
 GAME weapon level cap: 5
 PASS: touch pause/results taps survive network polling
-FRAME 0 HASH a6c13fc2e9bd0604
-FRAME 60 HASH 18aa446fbd19380f
-FRAME 120 HASH 52ec33af33ddb5d0
-AUDIO results boundary: removed 82 effect voices
+FRAME 0 HASH 40572cce69c9a8fe
+FRAME 60 HASH dc5b70e145c8d24c
+FRAME 120 HASH 251a68cabacd5c25
+AUDIO results boundary: removed 95 effect voices
 AUDIO cue GAME OVER
 RESULTS mask=3 scores=0,0,0,0 high=0
-FRAME 180 HASH b7e0344c8cf36bb8
-FRAME 240 HASH 0fec178a29bb637e
-FRAME 300 HASH 951f9f0513fae8ff
-FRAME 360 HASH c5b57f4fd60411c9
-FRAME 420 HASH d2bd194475e616e9
+FRAME 180 HASH 6db02d5eebc709fc
+FRAME 240 HASH 6fc3e3281d435fb2
+FRAME 300 HASH bbae5d9cc4803e97
+FRAME 360 HASH e358c057702b5eb1
+FRAME 420 HASH a1a8dae6c5891149
 AUDIO cue WINNER FANFARE
 RESULTS winner reveal player=1 score=0 tied=1
-FRAME 480 HASH 1f006e1679904801
-FRAME 540 HASH b2bc9d51832bb7ed
-RESULTS RETURN SYNCHRONIZED
+FRAME 480 HASH 9040c88676183229
+FRAME 540 HASH 7332dff1277850b9
+MUSIC selected ORIGINAL
+GAME players started: 2
+GAME weapon level cap: 5
+RESULTS REMATCH SYNCHRONIZED: same connected players, fresh seed, reset round
+FRAME 600 HASH f65bdd40ceebef3e
+FRAME 660 HASH d53315b640d0e7ba
+PAUSE EXIT TO MAIN MENU: PASS

@@ -1855,7 +1855,7 @@ int CGame::Update() {
       bool tied = m_ResultOrder.size() > 1 && m_FinalScores[m_ResultOrder[1]] == m_FinalScores[winner];
       fprintf(stderr, "RESULTS winner reveal player=%d score=%d tied=%d\n", winner+1, m_FinalScores[winner], tied);
     }
-    if (NativeResultsCanContinue(m_ResultOrder.size(), m_ResultsTime / 60.f)) {
+    if (!LanActive()&&NativeResultsCanContinue(m_ResultOrder.size(), m_ResultsTime / 60.f)) {
       for (const auto &pad : XEngine->GamePad)
         if ((pad.wPressedButtons & 0x10) || pad.bPressedAnalogButtons[0])
           return 0;
@@ -4546,5 +4546,5 @@ void CGame::DrawResults() {
   } else if(locked) {
     XEngine->DrawUiText(NativeResultScoreProgress(count,t)<1?"COUNTING SCORES...":"FINAL STANDINGS",320,413,11,190,162,125,true);
   }
-  XEngine->DrawUiText(NativeResultsCanContinue(count,t)?"ENTER / A / START: TITLE SCREEN":"RESULTS REVEAL IN PROGRESS",320,447,11,194,180,157,true);
+  if(!LanActive())XEngine->DrawUiText(NativeResultsCanContinue(count,t)?"ENTER / A / START: TITLE SCREEN":"RESULTS REVEAL IN PROGRESS",320,447,11,194,180,157,true);
 }

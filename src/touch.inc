@@ -3,9 +3,9 @@ struct Finger{float x,y;int role;};static std::map<SDL_FingerID,Finger> fingers;
 static SDL_JoystickID lastMenuController=-1;
 static bool awaitingSoloController=false;
 static XBGAMEPAD lanLocalInput;static WORD lanButtonLatch=0;static unsigned lanAnalogLatch=0;
-static SDL_GameController* controllers[4]{};static bool pausePulse=false,confirmPulse=false;
+static SDL_GameController* controllers[4]{};static bool pausePulse=false,confirmPulse=false,lanBackPulse=false;static WORD lanChoicePulse=0;
 void NativeSetTouchScene(bool playing,bool results){if(playing!=touchPlaying||results!=touchResults){fingers.clear();tapPending=false;}touchPlaying=playing;touchResults=results;}
-int NativeTakeMenuTap(bool paused){if(!tapPending)return -1;tapPending=false;float top=paused?190:160;float rowHeight=paused?35:28;int row=(int)std::floor((tapY-(top-4))/rowHeight);if(tapX>=132&&tapX<=508&&row>=0&&row<(paused?5:8)&&tapY<top+row*rowHeight+26)return row;return -1;}
+int NativeTakeMenuTap(bool paused){if(!tapPending)return -1;tapPending=false;float top=paused?190:160;float rowHeight=paused?35:28;int row=(int)std::floor((tapY-(top-4))/rowHeight);if(tapX>=132&&tapX<=508&&row>=0&&row<(paused?4:8)&&tapY<top+row*rowHeight+26)return row;return -1;}
 struct TouchButton {int role;float x,y,w,h;const char*label;};
 static std::array<TouchButton,5> touchButtons(){
  float w=viewportW*520.f/viewportH;
@@ -45,10 +45,17 @@ static void initControllers(){
 }
 static void fingerEvent(SDL_FingerID id,float x,float y,int type){
  if(type==SDL_FINGERUP){auto it=fingers.find(id);if(it!=fingers.end()){if(!touchPlaying){float dx=x-it->second.x,dy=y-it->second.y;if(dx*dx+dy*dy<.0016f){tapX=(x*viewportW-view.x)*680/view.w-20;tapY=(y*viewportH-view.y)*520/view.h-20;tapPending=true;}}fingers.erase(it);}return;}
- if(type==SDL_FINGERDOWN){if(touchResults){confirmPulse=true;return;}int role=touchPlaying?roleAt(x,y):-1;if(role==6){pausePulse=true;return;}fingers[id]={x,y,role};}
+ if(type==SDL_FINGERDOWN){
+ if(LanActive()&&LanMenuMode()){
+  float gx=(x*viewportW-view.x)*680/view.w-20,gy=(y*viewportH-view.y)*520/view.h-20;int mode=LanMenuMode();
+  if(mode==1&&gx>=160&&gx<=480){if(gy>=200&&gy<=242)lanChoicePulse=64;if(gy>=256&&gy<=298)lanChoicePulse=128;}
+  if(mode==2&&gy>=435&&gy<=479){if(gx>=80&&gx<=300)lanChoicePulse=64;if(gx>=340&&gx<=560)lanChoicePulse=128;}
+  return;
+ }
+ if(touchResults){confirmPulse=true;return;}int role=touchPlaying?roleAt(x,y):-1;if(role==6){pausePulse=true;return;}fingers[id]={x,y,role};}
  else if(touchPlaying){auto it=fingers.find(id);if(it!=fingers.end()){it->second.x=x;it->second.y=y;}}
 }
-static void resetTouches(){fingers.clear();tapPending=false;pausePulse=false;confirmPulse=false;for(auto&p:XEngine->GamePad)p=XBGAMEPAD{};}
+static void resetTouches(){fingers.clear();tapPending=false;pausePulse=false;confirmPulse=false;lanBackPulse=false;lanChoicePulse=0;for(auto&p:XEngine->GamePad)p=XBGAMEPAD{};}
 static void pollEvents(){SDL_Event e;do{
  while(SDL_PollEvent(&e)){
  if(ControllerMapEvent(e))continue;
@@ -91,7 +98,7 @@ static void updatePads(){
   if(buttons&4)lx=-1;if(buttons&8)lx=1;if(buttons&1)ly=1;if(buttons&2)ly=-1;
  }
  if(i==0){for(auto&entry:fingers){auto&f=entry.second;if(f.role==0){float radius=viewportH*.13f;lx=std::clamp((f.x-.12f)*viewportW/radius,-1.f,1.f);ly=std::clamp((.76f-f.y)*viewportH/radius,-1.f,1.f);}if(f.role==1){float radius=viewportH*.13f;rx=std::clamp((f.x-.89f)*viewportW/radius,-1.f,1.f);ry=std::clamp((.70f-f.y)*viewportH/radius,-1.f,1.f);analog[7]=255;}if(f.role==2)analog[6]=255;if(f.role==3)analog[0]=255;if(f.role==4)analog[4]=255;if(f.role==5)analog[5]=255;}
- if(confirmPulse){analog[0]=255;confirmPulse=false;}if(pausePulse){buttons|=16;pausePulse=false;}
+ if(confirmPulse){analog[0]=255;confirmPulse=false;}if(pausePulse){buttons|=16;pausePulse=false;}if(lanBackPulse){buttons|=32;lanBackPulse=false;}buttons|=lanChoicePulse;lanChoicePulse=0;
  const Uint8*k=SDL_GetKeyboardState(nullptr);if(k[SDL_SCANCODE_RETURN])buttons|=16;if(k[SDL_SCANCODE_A])lx=-1;if(k[SDL_SCANCODE_D])lx=1;if(k[SDL_SCANCODE_W])ly=1;if(k[SDL_SCANCODE_S])ly=-1;if(k[SDL_SCANCODE_LEFT])rx=-1;if(k[SDL_SCANCODE_RIGHT])rx=1;if(k[SDL_SCANCODE_UP])ry=1;if(k[SDL_SCANCODE_DOWN])ry=-1;if(k[SDL_SCANCODE_SPACE])analog[7]=255;
  }
  p.hDevice=(c||i==0)?(HANDLE)(uintptr_t)(i+1):nullptr;p.wPressedButtons=buttons&~p.wLastButtons;p.wButtons=p.wLastButtons=buttons;
@@ -101,7 +108,7 @@ static void updatePads(){
  }
 }
 static void controlBox(float x,float y,float w,float h,const char*label){XEngine->FillRect(x,y,w,h,.05f,.04f,.03f,.62f);XEngine->FillRect(x,y,w,1,.8f,.56f,.3f,.8f);XEngine->DrawUiText(label,x+w/2,y+h/2-6,9,245,214,170,true);}
-static void drawTouch(){if(!touchPlaying||touchResults)return;glViewport(0,0,viewportW,viewportH);glMatrixMode(GL_PROJECTION);glLoadIdentity();glOrtho(0,viewportW*520.f/viewportH,520,0,-1,1);glMatrixMode(GL_MODELVIEW);glLoadIdentity();XEngine->SetCameraPos(0,0);float w=viewportW*520.f/viewportH;
+static void drawTouch(){if(!touchPlaying||touchResults||LanMenuMode())return;glViewport(0,0,viewportW,viewportH);glMatrixMode(GL_PROJECTION);glLoadIdentity();glOrtho(0,viewportW*520.f/viewportH,520,0,-1,1);glMatrixMode(GL_MODELVIEW);glLoadIdentity();XEngine->SetCameraPos(0,0);float w=viewportW*520.f/viewportH;
  controlBox(.12f*w-58,.76f*520-58,116,116,"MOVE");
  controlBox(.89f*w-58,.70f*520-58,116,116,"AIM / FIRE");
  for(const auto&b:touchButtons())controlBox(b.x,b.y,b.w,b.h,b.label);
@@ -111,3 +118,10 @@ XBGAMEPAD NativeLanReadLocalInput(){auto p=lanLocalInput;p.wButtons|=lanButtonLa
 #ifndef __ANDROID__
 bool NativeLanLatchSelfTest(){pausePulse=true;confirmPulse=true;updatePads();updatePads();auto first=NativeLanReadLocalInput();updatePads();auto second=NativeLanReadLocalInput();return (first.wButtons&16)&&first.bAnalogButtons[0]==255&&!(second.wButtons&16)&&second.bAnalogButtons[0]==0;}
 #endif
+
+void NativeLanRequestBack(){lanBackPulse=true;updatePads();}
+void NativeLanDrawMenu(){int mode=LanMenuMode();static int previousMode=0;if(mode!=previousMode){fingers.clear();previousMode=mode;}if(!mode)return;int selected=LanMenuSelection();
+ if(mode==1){XEngine->SetCameraPos(0,0);XEngine->FillRect(-20,-20,680,520,0,0,0,.78f);XEngine->DrawUiText("PAUSED",320,120,30,255,230,185,true);}
+ for(int i=0;i<2;i++){float x=mode==1?160.f:i==0?80.f:340.f,y=mode==1?200.f+i*56.f:435.f,w=mode==1?320.f:220.f;bool active=selected==i;XEngine->FillRect(x,y,w,42,active?.32f:.12f,active?.13f:.08f,.05f,1);XEngine->DrawUiText(i==0?(mode==1?"RESUME":"PLAY AGAIN"):(mode==1?"EXIT GAME":"MAIN MENU"),x+w/2,y+9,16,active?255:190,active?230:175,active?185:150,true);}
+ if(mode==1)XEngine->DrawUiText("START / B: RESUME - EXIT GAME RETURNS EVERYONE TO MAIN MENU",320,340,9,205,185,150,true);
+}

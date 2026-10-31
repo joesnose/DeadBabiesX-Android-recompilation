@@ -1,0 +1,7 @@
+ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
+MENU title
+MENU pause
+MENU selection 1
+MENU selection 2
+MENU selection 3
+PAUSE EXIT RETURNS TO MAIN MENU: PASS

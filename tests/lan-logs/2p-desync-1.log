@@ -1,4 +1,4 @@
-READY slot=1 players=2 mega=1 seed=2799303480
+READY slot=1 players=2 mega=1 seed=2801214070
 ART hd: game/hd/data/backgrounds/train_bg1.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg2.png (2048x2048)
 ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
@@ -77,5 +77,5 @@ MUSIC selected ORIGINAL
 GAME players started: 2
 GAME weapon level cap: 5
 PASS: touch pause/results taps survive network polling
-FRAME 0 HASH 27245c22f38cdf32
+FRAME 0 HASH 146f4187da4fd5e5
 EXCHANGE END: LAN lost sync at frame 20. Install the same version on every phone.

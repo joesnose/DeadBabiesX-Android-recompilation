@@ -1,0 +1,101 @@
+READY slot=1 players=4 mega=1 seed=2801214893
+ART hd: game/hd/data/backgrounds/train_bg1.png (2048x2048)
+ART hd: game/hd/data/backgrounds/train_bg2.png (2048x2048)
+ART hd: game/hd/data/backgrounds/train_bg3.png (1024x1024)
+ART hd: game/hd/data/aimers/aimer_red.png (128x128)
+ART hd: game/hd/data/aimers/aimer_yellow.png (128x128)
+ART hd: game/hd/data/aimers/aimer_blue.png (128x128)
+ART hd: game/hd/data/aimers/aimer_green.png (128x128)
+ART hd: game/hd/data/crates/paracute.png (256x256)
+ART hd: game/hd/data/crates/random_crate.png (256x256)
+ART hd: game/hd/data/crates/rail_crate.png (256x256)
+ART hd: game/hd/data/crates/gun_crate.png (256x256)
+ART hd: game/hd/data/crates/rocket_crate.png (256x256)
+ART hd: game/hd/data/crates/plasma_crate.png (256x256)
+ART hd: game/hd/data/crates/grenade_crate.png (256x256)
+ART hd: game/hd/data/crates/flamethrower_crate.png (256x256)
+ART hd: game/hd/data/crates/nuke_crate.png (256x256)
+ART hd: game/hd/data/crates/shield_crate.png (256x256)
+ART hd: game/hd/data/crates/gravity_crate.png (256x256)
+ART hd: game/hd/data/crates/time_crate.png (256x256)
+ART hd: game/hd/data/crates/ioncannon_crate.png (256x256)
+ART hd: game/hd/data/player/red/red_legs_1.png (256x256)
+ART hd: game/hd/data/player/red/red_legs_2.png (256x256)
+ART hd: game/hd/data/player/red/red_legs_3.png (256x256)
+ART hd: game/hd/data/player/red/red_legs_4.png (256x256)
+ART hd: game/hd/data/player/red/red_legs_stand.png (256x256)
+ART hd: game/hd/data/player/red/red_0.png (256x256)
+ART hd: game/hd/data/player/red/red_45.png (256x256)
+ART hd: game/hd/data/player/red/red_90.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_legs_1.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_legs_2.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_legs_3.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_legs_4.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_legs_stand.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_0.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_45.png (256x256)
+ART hd: game/hd/data/player/yellow/yellow_90.png (256x256)
+ART hd: game/hd/data/player/blue/blue_legs_1.png (256x256)
+ART hd: game/hd/data/player/blue/blue_legs_2.png (256x256)
+ART hd: game/hd/data/player/blue/blue_legs_3.png (256x256)
+ART hd: game/hd/data/player/blue/blue_legs_4.png (256x256)
+ART hd: game/hd/data/player/blue/blue_legs_stand.png (256x256)
+ART hd: game/hd/data/player/blue/blue_0.png (256x256)
+ART hd: game/hd/data/player/blue/blue_45.png (256x256)
+ART hd: game/hd/data/player/blue/blue_90.png (256x256)
+ART hd: game/hd/data/player/green/green_legs_1.png (256x256)
+ART hd: game/hd/data/player/green/green_legs_2.png (256x256)
+ART hd: game/hd/data/player/green/green_legs_3.png (256x256)
+ART hd: game/hd/data/player/green/green_legs_4.png (256x256)
+ART hd: game/hd/data/player/green/green_legs_stand.png (256x256)
+ART hd: game/hd/data/player/green/green_0.png (256x256)
+ART hd: game/hd/data/player/green/green_45.png (256x256)
+ART hd: game/hd/data/player/green/green_90.png (256x256)
+ART hd: game/hd/data/player/red/red_lives.png (128x128)
+ART hd: game/hd/data/player/yellow/yellow_lives.png (128x128)
+ART hd: game/hd/data/player/blue/blue_lives.png (128x128)
+ART hd: game/hd/data/player/green/green_lives.png (128x128)
+ART hd: game/hd/data/babies/babyballoon1.png (128x128)
+ART hd: game/hd/data/babies/babyballoon2.png (128x128)
+ART hd: game/hd/data/babies/babyballoon3.png (128x128)
+ART hd: game/hd/data/babies/baby_getup_1.png (128x128)
+ART hd: game/hd/data/babies/baby_getup_2.png (128x128)
+ART hd: game/hd/data/babies/baby_getup_3.png (128x128)
+ART hd: game/hd/data/babies/baby_getup_4.png (128x128)
+ART hd: game/hd/data/babies/baby_walk_1.png (128x128)
+ART hd: game/hd/data/babies/baby_walk_2.png (128x128)
+ART hd: game/hd/data/babies/baby_walk_3.png (128x128)
+ART hd: game/hd/data/babies/baby_walk_4.png (128x128)
+ART hd: game/hd/data/babies/baby_walk_5.png (128x128)
+ART hd: game/hd/data/babies/deadbaby.png (128x128)
+ART hd: game/hd/data/babies/balloon.png (128x128)
+ART hd: game/hd/data/weapons/rocket.png (128x128)
+ART hd: game/hd/data/weapons/plasma.png (128x128)
+ART hd: game/hd/data/babies/baby_bomb.png (128x128)
+ART hd: game/hd/data/weapons/grenade.png (128x128)
+MUSIC selected ORIGINAL
+GAME players started: 4
+GAME weapon level cap: 5
+PASS: touch pause/results taps survive network polling
+FRAME 0 HASH 061da696b97d2831
+FRAME 60 HASH 6b81d6b6f3664d93
+FRAME 120 HASH 9b91d21499fdffdf
+AUDIO results boundary: removed 95 effect voices
+AUDIO cue GAME OVER
+RESULTS mask=15 scores=0,0,0,0 high=0
+FRAME 180 HASH d7a5380711ab6f70
+FRAME 240 HASH ee3071750a5a4f3e
+FRAME 300 HASH 328f3a0b85e52fbb
+FRAME 360 HASH 88c76c9a02b09ddd
+FRAME 420 HASH 8b58de975caf686d
+AUDIO cue WINNER FANFARE
+RESULTS winner reveal player=1 score=0 tied=1
+FRAME 480 HASH ae1d086b6d0e9f3d
+FRAME 540 HASH 7c2ec60152b6cf35
+MUSIC selected ORIGINAL
+GAME players started: 4
+GAME weapon level cap: 5
+RESULTS REMATCH SYNCHRONIZED: same connected players, fresh seed, reset round
+FRAME 600 HASH 629417cf1d27c3ce
+FRAME 660 HASH 138a103f9ed544c7
+PAUSE EXIT TO MAIN MENU: PASS

@@ -20,11 +20,14 @@ int NativeLanIntegrationTest(int argc,char**argv){
  XEngine->m_Ticks=0;XEngine->SetGameSpeed(1);SetStartingPlayers(config.players);SetMegaWeapons(config.mega);Game.Init();NativeSetTouchScene(true,false);
  if(!NativeLanLatchSelfTest()){fprintf(stderr,"LAN touch pulse latch failed\n");LanStop();return 1;}
  fprintf(stderr,"PASS: touch pause/results taps survive network polling\n");
- bool pauseObserved=false,resumeObserved=false,fireObserved=false;
+ bool pauseObserved=false,resumeObserved=false,fireObserved=false;int rematches=0;uint32_t firstSeed=LanSeed();
  for(int frame=0;frame<frames;frame++){
   auto&local=XEngine->GamePad[0];local=XBGAMEPAD{};local.hDevice=(void*)1;local.fX1=(frame%120<60?.65f:-.65f);local.fX2=.55f;local.fY2=.35f;local.bAnalogButtons[7]=(frame%80<40)?255:0;local.bAnalogButtons[0]=255;
   if(mode=="normal"&&frame%120==0)for(auto*p:Game.m_PlayerList){p->m_PlayerCondition=PC_INVINCIBLE;p->m_ConditionTime=300;}
   if(host&&(frame==80||frame==90))local.wButtons=16;
+  if(mode=="results"&&host&&frame==700)local.wButtons=16;
+  if(mode=="results"&&host&&frame==710)local.wButtons=128;
+  if(mode=="pauseexit"&&host&&frame==90)local.wButtons=128;
   if(!host&&mode=="desync"&&frame==20)Game.m_PlayerList.front()->m_Score++;
   if(!host&&mode=="disconnect"&&frame==20){LanCancel();LanStop();fprintf(stderr,"INTENTIONAL DISCONNECT\n");return 0;}
   if(mode=="results"&&frame==120)for(auto*p:Game.m_PlayerList)p->m_Lives=-1;
@@ -33,12 +36,24 @@ int NativeLanIntegrationTest(int argc,char**argv){
    auto message=LanStatus();fprintf(stderr,"EXCHANGE END: %s\n",message.c_str());LanStop();
    bool intended=(mode=="desync"&&(message.find("sync")!=std::string::npos||message.find("disconnected")!=std::string::npos))||(mode=="disconnect"&&message.find("disconnected")!=std::string::npos);return intended?0:1;
   }
+  if(frame==81&&paused&&!NativeLanMenuTouchSelfTest()){fprintf(stderr,"LAN pause touch targets failed\n");LanStop();return 1;}
+  auto action=LanTakeAction();
+  if(action==LanAction::PlayAgain){
+   if(mode!="results"){fprintf(stderr,"Unexpected rematch action\n");LanStop();return 1;}
+   rematches++;XEngine->m_Ticks=0;XEngine->SetGameSpeed(1);ResetNativeRound();
+   if(!LanActive()||LanPlayerSlot()!=config.slot||LanSeed()==firstSeed||Game.m_NumPlayers!=config.players){LanStop();return 1;}
+   fprintf(stderr,"RESULTS REMATCH SYNCHRONIZED: same connected players, fresh seed, reset round\n");continue;
+  }
+  if(action==LanAction::MainMenu){
+   bool ok=(mode=="results"&&rematches==1)||(mode=="pauseexit"&&pauseObserved);
+   fprintf(stderr,"PAUSE EXIT TO MAIN MENU: %s\n",ok?"PASS":"FAIL");LanStop();return ok?0:1;
+  }
   if(frame%60==0)fprintf(stderr,"FRAME %d HASH %016llx\n",frame,(unsigned long long)LanGameHash());
   if(paused)pauseObserved=true;else{
    if(pauseObserved)resumeObserved=true;
    int ongoing=Game.Update();XEngine->m_Ticks+=XEngine->m_GameSpeed;
    fireObserved|=!Game.m_BulletList.empty()||!Game.m_PlasmaList.empty()||!Game.m_RocketList.empty()||!Game.m_FlameList.empty()||!Game.m_GrenadeList.empty();
-   if(!ongoing&&mode=="results"){fprintf(stderr,"RESULTS RETURN SYNCHRONIZED\n");LanStop();return 0;}
+   if(!ongoing){fprintf(stderr,"Round ended before session menu choice\n");LanStop();return 1;}
   }
  }
  fprintf(stderr,"LAN MATCH PASS slot=%d ticks=%.1f paused=%d resumed=%d projectiles=%d hash=%016llx\n",config.slot,XEngine->m_Ticks,pauseObserved,resumeObserved,fireObserved,(unsigned long long)LanGameHash());

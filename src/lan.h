@@ -19,3 +19,8 @@ void NativeShowLanSetup(bool mega);
 void NativeLanPump();
 
 bool LanLobbyOpen();
+
+enum class LanAction {None,PlayAgain,MainMenu};
+LanAction LanTakeAction();
+int LanMenuMode();
+int LanMenuSelection();
