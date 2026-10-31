@@ -11,13 +11,15 @@
 #include "audio_mixer.h"
 using std::max;
 using std::min;
+bool LanActive();
+float Sqrt(float);
 struct D3DXVECTOR2 {
   float x = 0, y = 0;
   D3DXVECTOR2() = default;
   D3DXVECTOR2(float a, float b) : x(a), y(b) {}
 };
 inline void D3DXVec2Normalize(D3DXVECTOR2 *o, const D3DXVECTOR2 *v) {
-  float n = std::hypot(v->x, v->y);
+  float n = LanActive()?Sqrt(v->x*v->x+v->y*v->y):std::hypot(v->x, v->y);
   *o = n > 0 ? D3DXVECTOR2(v->x / n, v->y / n) : D3DXVECTOR2();
 }
 struct IDirect3DTexture8 {

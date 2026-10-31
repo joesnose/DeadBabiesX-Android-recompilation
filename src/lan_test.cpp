@@ -23,6 +23,7 @@ int NativeLanIntegrationTest(int argc,char**argv){
  bool pauseObserved=false,resumeObserved=false,fireObserved=false;
  for(int frame=0;frame<frames;frame++){
   auto&local=XEngine->GamePad[0];local=XBGAMEPAD{};local.hDevice=(void*)1;local.fX1=(frame%120<60?.65f:-.65f);local.fX2=.55f;local.fY2=.35f;local.bAnalogButtons[7]=(frame%80<40)?255:0;local.bAnalogButtons[0]=255;
+  if(mode=="normal"&&frame%120==0)for(auto*p:Game.m_PlayerList){p->m_PlayerCondition=PC_INVINCIBLE;p->m_ConditionTime=300;}
   if(host&&(frame==80||frame==90))local.wButtons=16;
   if(!host&&mode=="desync"&&frame==20)Game.m_PlayerList.front()->m_Score++;
   if(!host&&mode=="disconnect"&&frame==20){LanCancel();LanStop();fprintf(stderr,"INTENTIONAL DISCONNECT\n");return 0;}

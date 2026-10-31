@@ -10,6 +10,7 @@
 #include "game.h"
 #include "lan.h"
 #include "sync_rng.h"
+#include "sync_math.h"
 #define rand NativeGameRandom
 #define srand NativeGameSeed
 #include "results_presentation.h"
@@ -1662,6 +1663,7 @@ void CGame::LoadArt() {
 }
 
 void CGame::Init() {
+  if(LanActive())DbxSyncMath::prepareEnvironment();
   srand(LanActive()?LanSeed():XEngine->m_Millisecs.LowPart);
 
   m_BabyList.clear();
@@ -1834,6 +1836,7 @@ void CGame::Init() {
 }
 
 int CGame::Update() {
+  if(LanActive())DbxSyncMath::prepareEnvironment();
   // Deterministic end-of-round fixture; absent from ordinary play.
   if (const char *test = getenv("DBX_TEST_GAMEOVER_AT")) {
     if (!m_ResultsReady && XEngine->m_Ticks >= atof(test) * 60) {

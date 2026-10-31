@@ -1,6 +1,7 @@
 #include "frontend.h"
 #include "game.h"
 #include "lan.h"
+#include "controller_map.h"
 #include <exception>
 #include <string>
 extern void ResetNativeRound();
@@ -11,6 +12,7 @@ extern void NativeStopAudio();
 int main(int argc,char**argv) {
 #ifndef __ANDROID__
  extern int NativeAndroidSelfTest();
+ if(argc>1&&std::string(argv[1])=="--controller-map-test")return ControllerMapSelfTest();
  extern int NativeInputSelfTest();
  extern int NativeRelaunchSelfTest();
  if(argc>1&&std::string(argv[1])=="--relaunch-self-test")return NativeRelaunchSelfTest();
@@ -25,6 +27,7 @@ int main(int argc,char**argv) {
   try {
     XEngine->XInit();
     Frontend frontend;
+    bool controllerScreenWasOpen=false;
     XEngine->PlayMusic("d:\\data\\music\\music3.wma");
     bool roundExists = false;
     if (getenv("DBX_STRESS")) {
@@ -45,6 +48,8 @@ int main(int argc,char**argv) {
       }
       NativeSetTouchScene(frontend.playing, Game.m_ResultsReady);
       if (!frontend.playing) {
+        if(ControllerMapActive()){controllerScreenWasOpen=true;ControllerMapDraw();XEngine->XUpdate();continue;}
+        if(controllerScreenWasOpen){controllerScreenWasOpen=false;frontend.OpenTitle();continue;}
         if(LanLobbyOpen()){frontend.Draw();XEngine->XUpdate();continue;}
         MenuAction action = frontend.Update();
         if (action == MenuAction::Exit) {
@@ -85,7 +90,7 @@ int main(int argc,char**argv) {
           XEngine->PlayMusic("d:\\data\\music\\music3.wma");
           frontend.OpenTitle();
         }
-        frontend.Draw();
+        if(ControllerMapActive()){controllerScreenWasOpen=true;ControllerMapDraw();}else frontend.Draw();
         XEngine->XUpdate();
         continue;
       }

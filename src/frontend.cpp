@@ -1,5 +1,6 @@
 #include "frontend.h"
 #include "lan.h"
+#include "controller_map.h"
 #include <string>
 #include "ui_style.h"
 Frontend::Frontend() {
@@ -84,7 +85,7 @@ MenuAction Frontend::Update() {
       inputArmed = true;
     return MenuAction::None;
   }
-  int count = paused ? 5 : 7;
+  int count = paused ? 5 : 8;
   int tapped=NativeTakeMenuTap(paused);
   if(tapped>=0 && tapped<count){selection=tapped;confirm=true;}
 
@@ -121,6 +122,7 @@ MenuAction Frontend::Update() {
     if (selection == 3) return MenuAction::Title;
     return MenuAction::Exit;
   }
+  if(selection==6){ControllerMapOpen();return MenuAction::None;}
   if(selection==5){NativePrepareGameplayController(starterPad);NativeShowLanSetup(megaWeapons);return MenuAction::None;}
   if(selection==0){NativePrepareGameplayController(starterPad);return MenuAction::Start;}
   return MenuAction::Exit;
@@ -168,10 +170,10 @@ void Frontend::Draw() {
   XEngine->DrawUiText("DEAD BABIES X",320,42,32,245,228,199,true);
   XEngine->FillRect(276,84,88,2,.78f,.23f,.13f,1);
   XEngine->DrawUiText(paused?"PAUSED":"XTREME EDITION",320,98,12,195,148,104,true);
-  const int count=paused?5:7;
-  const float panelY=paused?150.f:130.f;
-  const float top=paused?190.f:170.f;
-  const float rowHeight=paused?35.f:31.f;
+  const int count=paused?5:8;
+  const float panelY=paused?150.f:120.f;
+  const float top=paused?190.f:160.f;
+  const float rowHeight=paused?35.f:28.f;
   NativeUiPanel(112,panelY,416,paused?236.f:275.f);
   XEngine->DrawUiText(paused?"ROUND PAUSED":"ARENA SETUP",132,panelY+13,10,175,149,116,false);
   XEngine->FillRect(462,panelY+16,4,4,paused?.85f:.38f,paused?.44f:.63f,.20f,1);
@@ -182,7 +184,7 @@ void Frontend::Draw() {
   snprintf(graphicsText,sizeof(graphicsText),"GRAPHICS: < %s >",NativeArtLabel(artMode));
   snprintf(musicText,sizeof(musicText),"MUSIC: < %s >",NativeMusicLabel(NativeMusicChoice()));
   snprintf(megaText,sizeof(megaText),"MEGA WEAPONS: < %s >",megaWeapons?"ON":"OFF");
-  const char *titleItems[]={"START GAME",playersText,graphicsText,musicText,megaText,"LAN MULTIPLAYER","EXIT GAME"};
+  const char *titleItems[]={"START GAME",playersText,graphicsText,musicText,megaText,"LAN MULTIPLAYER","CONTROLLER MAPPING","EXIT GAME"};
   const char *pauseItems[]={"RESUME",graphicsText,musicText,"TITLE SCREEN","EXIT GAME"};
   for(int i=0;i<count;++i) {
     const float y=top+i*rowHeight;const bool active=i==selection;

@@ -1,0 +1,10 @@
+PASS: custom button and stick preference survive reload
+PASS: virtual physical controller opens
+PASS: new physical fire binding reaches game input
+PASS: stick swap reaches game input
+PASS: capture waits for the menu button to be released
+PASS: capture assigns the next physical button
+PASS: captured button activates fire
+PASS: reset restores right-trigger fire
+PASS: invalid saved mapping falls back to defaults
+CONTROLLER MAPPING TESTS: 0 failures

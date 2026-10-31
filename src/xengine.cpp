@@ -2,6 +2,8 @@
 #include "game.h"
 #include "lan.h"
 #include "sync_rng.h"
+#include "sync_math.h"
+#include "controller_map.h"
 #include "cartoon_shading.h"
 #include "cel_shading.h"
 #undef XInputSetState
@@ -320,7 +322,7 @@ int NativeAndroidSelfTest(){
  // Real SDL finger events pass through the production pump and touch mapping.
  auto touch=[&](SDL_FingerID id,float x,float y,int type){SDL_Event e{};e.type=type;e.tfinger.fingerId=id;e.tfinger.x=x;e.tfinger.y=y;SDL_PushEvent(&e);pollEvents();updatePads();};
  auto tap=[&](float gx,float gy){float x=(view.x+(gx+20)*view.w/680.f)/viewportW,y=(view.y+(gy+20)*view.h/520.f)/viewportH;touch(50,x,y,SDL_FINGERDOWN);touch(50,x,y,SDL_FINGERUP);};
- for(int row=1;row<6;row++){tap(300,170+row*31+10);check(NativeTakeMenuTap(false)==row,"touch menu row at viewport offset");}
+ for(int row=1;row<6;row++){tap(300,160+row*28+10);check(NativeTakeMenuTap(false)==row,"touch menu row at viewport offset");}
  tap(300,180);check(f.Update()==MenuAction::Start,"tap Start uses existing menu action");
  SetStartingPlayers(1);Game.Init();f.Play();NativeSetTouchScene(true,false);
  touch(1,.18f,.76f,SDL_FINGERDOWN);touch(2,.94f,.65f,SDL_FINGERDOWN);

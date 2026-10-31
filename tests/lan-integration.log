@@ -1,5 +1,5 @@
-PASS: 2 players, normal, 600 frames
-PASS: 4 players, normal, 900 frames
+PASS: 2 players, normal, 14400 frames
+PASS: 4 players, normal, 7200 frames
 PASS: 2 players, results, 600 frames
 PASS: 2 players, desync, 60 frames
 PASS: 2 players, disconnect, 60 frames

@@ -17,9 +17,9 @@
 #include <cstring>
 #include <stdexcept>
 namespace {
-constexpr uint32_t Magic=0x4442584c,Version=0x00010301;
+constexpr uint32_t Magic=0x4442584c,Version=0x00010401;
 constexpr uint16_t Port=39828;
-enum Type {Hello=1,Start=2,Input=3,Frame=4};
+enum Type {Hello=1,Start=2,Input=3,Frame=4,Error=5};
 using Bytes=std::vector<uint8_t>;
 void u16(Bytes&b,uint16_t v){b.push_back(v>>8);b.push_back(v);}
 void u32(Bytes&b,uint32_t v){u16(b,v>>16);u16(b,v);}
@@ -38,6 +38,7 @@ struct Session {
  void set(const std::string&s){std::lock_guard<std::mutex>l(mutex);status=s;}
  void fail(const std::string&s){set(s);cancel=true;}
 };
+std::atomic<bool>activeFlag{false};
 std::mutex globalMutex;std::shared_ptr<Session>current;
 std::shared_ptr<Session> get(){std::lock_guard<std::mutex>l(globalMutex);return current;}
 uint64_t clockMs(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();}
@@ -52,7 +53,7 @@ void transfer(Session&s,int fd,uint8_t*p,size_t n,bool sending,uint64_t deadline
  }
 }
 void sendPacket(Session&s,int fd,Type t,const Bytes&data,uint64_t deadline,void(*pump)()=nullptr){Bytes b;u32(b,Magic);u16(b,t);u16(b,data.size());b.insert(b.end(),data.begin(),data.end());transfer(s,fd,b.data(),b.size(),true,deadline,pump);}
-Bytes receive(Session&s,int fd,Type t,uint64_t deadline,void(*pump)()=nullptr){Bytes h(8);transfer(s,fd,h.data(),h.size(),false,deadline,pump);Reader r{h};if(r.dword()!=Magic||r.word()!=t)throw std::runtime_error("Incompatible LAN game. Install the same APK on every phone.");auto n=r.word();if(n>128)throw std::runtime_error("Invalid LAN packet size");Bytes b(n);transfer(s,fd,b.data(),n,false,deadline,pump);return b;}
+Bytes receive(Session&s,int fd,Type t,uint64_t deadline,void(*pump)()=nullptr){Bytes h(8);transfer(s,fd,h.data(),h.size(),false,deadline,pump);Reader r{h};if(r.dword()!=Magic)throw std::runtime_error("Incompatible LAN game. Install the same APK on every phone.");auto kind=r.word(),n=r.word();if(n>128)throw std::runtime_error("Invalid LAN packet size");Bytes b(n);transfer(s,fd,b.data(),n,false,deadline,pump);if(kind==Error){for(auto&c:b)if(c<32||c>126)c=63;throw std::runtime_error(std::string(b.begin(),b.end()));}if(kind!=t)throw std::runtime_error("Incompatible LAN message type");return b;}
 void handshake(Session&s,int fd){auto b=receive(s,fd,Hello,clockMs()+2500);Reader r{b};if(r.dword()!=Version)throw std::runtime_error("LAN version mismatch. Use the same APK on all phones.");r.end();}
 std::shared_ptr<Session> make(bool host){auto old=get();if(old&&old->active)return {};LanStop();auto s=std::make_shared<Session>();s->host=host;{std::lock_guard<std::mutex>l(globalMutex);current=s;}return s;}
 }
@@ -78,21 +79,24 @@ void LanJoin(const std::string&ip){auto s=make(false);if(!s)return;s->set("Conne
  }catch(const std::exception&e){s->fail(e.what());}});}
 void LanStart(){auto s=get();if(s&&s->host)s->start=true;}
 void LanCancel(){auto s=get();if(s){s->fail("LAN game cancelled");if(s->active)for(int fd:s->peers)shutdown(fd,SHUT_RDWR);}}
-void LanStop(){std::shared_ptr<Session>s;{std::lock_guard<std::mutex>l(globalMutex);s=std::move(current);}if(s){s->cancel=true;s->joinWorker();}}
+void LanStop(){activeFlag=false;std::shared_ptr<Session>s;{std::lock_guard<std::mutex>l(globalMutex);s=std::move(current);}if(s){s->cancel=true;s->joinWorker();}}
 std::string LanStatus(){auto s=get();if(!s)return "No LAN room";if(s->active&&!s->cancel)return "PLAYING";std::lock_guard<std::mutex>l(s->mutex);return s->status;}
-bool LanTakeReady(LanConfig&c){auto s=get();if(s&&s->cancel&&!s->active){s->joinWorker();for(int fd:s->peers)close(fd);s->peers.clear();if(s->listener>=0){close(s->listener);s->listener=-1;}return false;}if(!s||!s->ready||s->cancel||s->active)return false;s->joinWorker();if(s->cancel)return false;c=s->config;s->active=true;return true;}
-bool LanActive(){auto s=get();return s&&s->active;}
+bool LanTakeReady(LanConfig&c){auto s=get();if(s&&s->cancel&&!s->active){s->joinWorker();for(int fd:s->peers)close(fd);s->peers.clear();if(s->listener>=0){close(s->listener);s->listener=-1;}return false;}if(!s||!s->ready||s->cancel||s->active)return false;s->joinWorker();if(s->cancel)return false;c=s->config;s->active=true;activeFlag=true;return true;}
+bool LanActive(){return activeFlag.load(std::memory_order_relaxed);}
 uint32_t LanSeed(){auto s=get();return s?s->config.seed:1;}
 int LanPlayerSlot(){auto s=get();return s?s->config.slot:0;}
 bool LanExchange(XBGAMEPAD*pads,uint64_t hash,bool&paused,void(*pump)()){
  auto s=get();if(!s||!s->active||s->cancel)return false;try{
  uint64_t deadline=clockMs()+(s->frame?7000:30000);Controls controls[4]{};auto local=capture(pads[0]);
- if(s->host){controls[0]=local;for(size_t i=0;i<s->peers.size();i++){auto b=receive(*s,s->peers[i],Input,deadline,pump);Reader r{b};if(r.dword()!=s->frame)throw std::runtime_error("LAN frame mismatch");if(r.qword()!=hash)throw std::runtime_error("LAN simulation lost sync. Rehost the room.");controls[i+1]=read(r);r.end();}
+ if(s->host){controls[0]=local;for(size_t i=0;i<s->peers.size();i++){auto b=receive(*s,s->peers[i],Input,deadline,pump);Reader r{b};if(r.dword()!=s->frame)throw std::runtime_error("LAN frame mismatch");if(r.qword()!=hash)throw std::runtime_error(("LAN lost sync at frame "+std::to_string(s->frame)+". Install the same version on every phone."));controls[i+1]=read(r);r.end();}
   bool toggle=false;for(int i=0;i<s->config.players;i++){if(controls[i].buttons&32)throw std::runtime_error("A player left the LAN game");toggle|=(controls[i].buttons&16)&&!(s->previous[i].buttons&16);}if(toggle)s->paused=!s->paused;
   Bytes frame;u32(frame,s->frame);u64(frame,hash);frame.push_back(s->paused);for(int i=0;i<s->config.players;i++)write(frame,controls[i]);for(int fd:s->peers)sendPacket(*s,fd,Frame,frame,deadline,pump);
- }else{Bytes b;u32(b,s->frame);u64(b,hash);write(b,local);sendPacket(*s,s->peers[0],Input,b,deadline,pump);b=receive(*s,s->peers[0],Frame,deadline,pump);Reader r{b};if(r.dword()!=s->frame||r.qword()!=hash)throw std::runtime_error("LAN simulation lost sync. Rehost the room.");s->paused=r.byte()!=0;for(int i=0;i<s->config.players;i++)controls[i]=read(r);r.end();}
+ }else{Bytes b;u32(b,s->frame);u64(b,hash);write(b,local);sendPacket(*s,s->peers[0],Input,b,deadline,pump);b=receive(*s,s->peers[0],Frame,deadline,pump);Reader r{b};if(r.dword()!=s->frame||r.qword()!=hash)throw std::runtime_error(("LAN lost sync at frame "+std::to_string(s->frame)+". Install the same version on every phone."));s->paused=r.byte()!=0;for(int i=0;i<s->config.players;i++)controls[i]=read(r);r.end();}
  for(int i=0;i<4;i++){auto&out=pads[i];auto&in=controls[i];out=XBGAMEPAD{};if(i>=s->config.players)continue;out.hDevice=(void*)(uintptr_t)(i+1);out.wButtons=in.buttons&~uint16_t(16);out.wPressedButtons=(in.buttons&~s->previous[i].buttons)&~uint16_t(16);out.wLastButtons=out.wButtons;float* axes[]={&out.fX1,&out.fY1,&out.fX2,&out.fY2};for(int k=0;k<4;k++)*axes[k]=std::clamp(in.axis[k]/32767.f,-1.f,1.f);for(int k=0;k<8;k++){bool on=in.analog&(1u<<k);out.bAnalogButtons[k]=on?255:0;out.bPressedAnalogButtons[k]=on&&!(s->previous[i].analog&(1u<<k));out.bLastAnalogButtons[k]=on;}s->previous[i]=in;}
  paused=s->paused;s->frame++;return true;
- }catch(const std::exception&e){s->fail(e.what());return false;}}
+ }catch(const std::exception&e){
+ if(FILE*f=fopen(getenv("DBX_LAN_DIAGNOSTICS")?getenv("DBX_LAN_DIAGNOSTICS"):"lan-diagnostics.txt","a")){fprintf(f,"frame=%u slot=%d hash=%016llx error=%s\n",s->frame,s->config.slot,(unsigned long long)hash,e.what());fclose(f);}
+ if(s->host){std::string text=e.what();if(text.size()>120)text.resize(120);Bytes msg(text.begin(),text.end());for(int fd:s->peers)try{sendPacket(*s,fd,Error,msg,clockMs()+100);}catch(...){};}
+ s->fail(e.what());return false;}}
 
 bool LanLobbyOpen(){auto s=get();return s&&!s->cancel&&!s->active;}

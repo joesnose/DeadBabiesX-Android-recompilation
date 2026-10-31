@@ -4,7 +4,7 @@ import os,sys,subprocess,time,re
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 exe=Path(sys.argv[1]).resolve() if len(sys.argv)>1 else root/'build-host-lan/dbx-host'
-env=os.environ.copy();logs=root/'tests/lan-logs';logs.mkdir(exist_ok=True)
+env=os.environ.copy();logs=root/'tests/lan-logs';logs.mkdir(exist_ok=True);env['DBX_LAN_DIAGNOSTICS']=str(logs/'diagnostics.log')
 def match(players,frames,mode):
  procs=[];files=[]
  try:
@@ -13,7 +13,7 @@ def match(players,frames,mode):
    role='--lan-host' if i==0 else '--lan-client'
    procs.append(subprocess.Popen([str(exe),role,str(players),str(frames),mode],cwd=root/'android/assets',env=env,stdout=f,stderr=f))
    if i==0:time.sleep(.2)
-  deadline=time.monotonic()+50
+  deadline=time.monotonic()+50+frames/80
   while any(p.poll() is None for p in procs):
    if time.monotonic()>deadline:raise AssertionError(f'{mode}: timed out')
    time.sleep(.05)
@@ -32,18 +32,18 @@ def match(players,frames,mode):
    if p.poll() is None:p.kill()
   for p in procs:p.wait()
   for f in files:f.close()
-match(2,600,'normal')
-match(4,900,'normal')
+match(2,14400,'normal')
+match(4,7200,'normal')
 match(2,600,'results')
 match(2,60,'desync')
 match(2,60,'disconnect')
 # An intentionally malformed peer must fail before allocating unbounded data or starting play.
 import socket,struct,threading
 for expected,payload,length,version in [
- ('packet size',b'',129,0x00010301),
- ('version',b'',None,0x00010302),
- ('assignment',b'bad-slot',None,0x00010301),
- ('disconnected',b'truncate',None,0x00010301),
+ ('packet size',b'',129,0x00010401),
+ ('version',b'',None,0x00010402),
+ ('assignment',b'bad-slot',None,0x00010401),
+ ('disconnected',b'truncate',None,0x00010401),
 ]:
  listener=socket.socket();listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);listener.bind(('127.0.0.1',39828));listener.listen(1);listener.settimeout(8)
  f=open(logs/('reject-'+expected.replace(' ','-')+'.log'),'w')

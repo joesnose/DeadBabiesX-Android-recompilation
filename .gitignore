@@ -12,3 +12,6 @@
 /host-lan-rebuild.log
 
 /relaunch-build.log
+
+/controller-build.log
+/android/assets/lan-diagnostics.txt

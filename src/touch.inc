@@ -5,7 +5,7 @@ static bool awaitingSoloController=false;
 static XBGAMEPAD lanLocalInput;static WORD lanButtonLatch=0;static unsigned lanAnalogLatch=0;
 static SDL_GameController* controllers[4]{};static bool pausePulse=false,confirmPulse=false;
 void NativeSetTouchScene(bool playing,bool results){if(playing!=touchPlaying||results!=touchResults){fingers.clear();tapPending=false;}touchPlaying=playing;touchResults=results;}
-int NativeTakeMenuTap(bool paused){if(!tapPending)return -1;tapPending=false;float top=paused?190:170;float rowHeight=paused?35:31;int row=(int)std::floor((tapY-(top-4))/rowHeight);if(tapX>=132&&tapX<=508&&row>=0&&row<(paused?5:7)&&tapY<top+row*rowHeight+26)return row;return -1;}
+int NativeTakeMenuTap(bool paused){if(!tapPending)return -1;tapPending=false;float top=paused?190:160;float rowHeight=paused?35:28;int row=(int)std::floor((tapY-(top-4))/rowHeight);if(tapX>=132&&tapX<=508&&row>=0&&row<(paused?5:8)&&tapY<top+row*rowHeight+26)return row;return -1;}
 struct TouchButton {int role;float x,y,w,h;const char*label;};
 static std::array<TouchButton,5> touchButtons(){
  float w=viewportW*520.f/viewportH;
@@ -38,6 +38,7 @@ void NativePrepareGameplayController(int slot){
  }
 }
 static void initControllers(){
+ ControllerMapLoad();
  int loaded=SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
  fprintf(stderr,"Controller mappings loaded: %d\n",loaded);
  for(int i=0;i<SDL_NumJoysticks();i++)openController(i);
@@ -50,6 +51,7 @@ static void fingerEvent(SDL_FingerID id,float x,float y,int type){
 static void resetTouches(){fingers.clear();tapPending=false;pausePulse=false;confirmPulse=false;for(auto&p:XEngine->GamePad)p=XBGAMEPAD{};}
 static void pollEvents(){SDL_Event e;do{
  while(SDL_PollEvent(&e)){
+ if(ControllerMapEvent(e))continue;
  switch(e.type){case SDL_QUIT:running=false;break;
  case SDL_APP_WILLENTERBACKGROUND:case SDL_APP_DIDENTERBACKGROUND:background=true;resetTouches();menuBack=touchPlaying;if(audioDevice)SDL_PauseAudioDevice(audioDevice,1);break;
  case SDL_APP_DIDENTERFOREGROUND:background=false;lastFrame=SDL_GetPerformanceCounter();if(audioDevice)SDL_PauseAudioDevice(audioDevice,0);break;
@@ -62,6 +64,7 @@ static void pollEvents(){SDL_Event e;do{
  case SDL_CONTROLLERDEVICEREMOVED:for(auto&c:controllers)if(c&&SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(c))==e.cdevice.which){SDL_GameControllerClose(c);c=nullptr;if(touchPlaying)menuBack=true;}break;
  }
  }
+ ControllerMapTick();
  if(background&&running)SDL_Delay(30);
  }while(background&&running);}
 static void updatePads(){
@@ -81,6 +84,7 @@ static void updatePads(){
  SDL_GameControllerButton b[]={SDL_CONTROLLER_BUTTON_A,SDL_CONTROLLER_BUTTON_B,SDL_CONTROLLER_BUTTON_X,SDL_CONTROLLER_BUTTON_Y,SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,SDL_CONTROLLER_BUTTON_LEFTSHOULDER};for(int j=0;j<6;j++)analog[j]=SDL_GameControllerGetButton(c,b[j])?255:0;analog[6]=std::max(0.f,axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT))*255;analog[7]=std::max(0.f,axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT))*255;
  if(SDL_GameControllerGetButton(c,SDL_CONTROLLER_BUTTON_START))buttons|=16;if(SDL_GameControllerGetButton(c,SDL_CONTROLLER_BUTTON_BACK))buttons|=32;SDL_GameControllerButton d[]={SDL_CONTROLLER_BUTTON_DPAD_UP,SDL_CONTROLLER_BUTTON_DPAD_DOWN,SDL_CONTROLLER_BUTTON_DPAD_LEFT,SDL_CONTROLLER_BUTTON_DPAD_RIGHT};for(int j=0;j<4;j++)if(SDL_GameControllerGetButton(c,d[j]))buttons|=1<<j;
  }
+ if(c){XBGAMEPAD mapped;mapped.wButtons=buttons;std::copy(analog,analog+8,mapped.bAnalogButtons);mapped.fX1=lx;mapped.fY1=ly;mapped.fX2=rx;mapped.fY2=ry;ControllerMapApply(c,mapped);buttons=mapped.wButtons;std::copy(mapped.bAnalogButtons,mapped.bAnalogButtons+8,analog);lx=mapped.fX1;ly=mapped.fY1;rx=mapped.fX2;ry=mapped.fY2;}
  if(!touchPlaying&&c&&(buttons||analog[0]||analog[1]||analog[4]||analog[5]||std::abs(lx)>.35f||std::abs(ly)>.35f||std::abs(rx)>.35f||std::abs(ry)>.35f))
   lastMenuController=SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(c));
  if(touchPlaying&&c){

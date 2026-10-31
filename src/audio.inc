@@ -172,13 +172,13 @@ void CXEngine::BeginResultsAudio() {
 }
 void CXEngine::PauseMusic(){std::lock_guard<std::mutex>l(audioMutex);musicPaused=!musicPaused;for(auto&v:voices)if(v.id==musicVoiceId)v.paused=musicPaused;}
 void CXEngine::SetMusicVolume(int v){std::lock_guard<std::mutex>l(audioMutex);musicVolume=std::clamp(v,0,1000);for(auto&v:voices)if(v.id==musicVoiceId)v.gain=.44f*musicVolume/1000.f;}
-float Sin(float a) { return std::sin(a * 0.017453292519943295f); }
-float Cos(float a) { return std::cos(a * 0.017453292519943295f); }
-float ATan2(float x, float y) { return std::atan2(x, y) * 57.29577951308232f; }
+float Sin(float a) { return LanActive()?DbxSyncMath::sin(a):std::sin(a * 0.017453292519943295f); }
+float Cos(float a) { return LanActive()?DbxSyncMath::cos(a):std::cos(a * 0.017453292519943295f); }
+float ATan2(float x, float y) { return LanActive()?DbxSyncMath::atan2(x,y):std::atan2(x, y) * 57.29577951308232f; }
 float fAbs(float a) { return std::abs(a); }
 float Rand() { return float(NativeGameRandom()) / 2147483648.f; }
 float Pow(float a, float b) { return std::pow(a, b); }
-float Sqrt(float a) { return std::sqrt(a); }
+float Sqrt(float a) { return LanActive()?DbxSyncMath::sqrt(a):std::sqrt(a); }
 
 COLLISIONINFO CXEngine::Collide(float X1, float Y1, float R1, float DX,
                                 float DY, float X2, float Y2, float R2) {
