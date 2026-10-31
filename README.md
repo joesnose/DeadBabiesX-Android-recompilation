@@ -3,6 +3,8 @@ This is a recompiled original Xbox homebrew game called DeadBabies xtreme. I was
 
 Native Android port of Dead Babies Xtreme, with touch controls, controller support, selectable graphics themes, and music. Based on the original game by Chris Friesen and contributors.
 
+**[Latest GitHub Release](https://github.com/joesnose/DeadBabiesX-Android-recompilation/releases/latest)**
+
 **[Download Android v1.5 LAN APK](downloads/DeadBabiesX-Android-v1.5-LAN.apk?raw=true)** · [Checksums](downloads/SHA256SUMS)
 
 Requires Android 8.0 or later on a 64-bit ARM phone or tablet. Download the APK, open it, and allow installation from your browser or file manager if Android asks. Version 1.5 installs over the previous Android preview builds and keeps the high score.
