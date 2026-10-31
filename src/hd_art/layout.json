@@ -1,0 +1,65 @@
+{
+  "hero": {
+    "files": [
+      "Player/Red/Red_Legs_1.png",
+      "Player/Red/Red_Legs_2.png",
+      "Player/Red/Red_Legs_3.png",
+      "Player/Red/Red_Legs_4.png",
+      "Player/Red/Red_Legs_Stand.png",
+      "Player/Red/Red_0.png",
+      "Player/Red/Red_45.png",
+      "Player/Red/Red_90.png"
+    ],
+    "cols": 4,
+    "rows": 2
+  },
+  "babies": {
+    "files": [
+      "Babies/BabyBalloon1.png",
+      "Babies/BabyBalloon2.png",
+      "Babies/BabyBalloon3.png",
+      "Babies/Baby_Stand.png",
+      "Babies/Baby_Walk_1.png",
+      "Babies/Baby_Walk_2.png",
+      "Babies/Baby_Walk_3.png",
+      "Babies/Baby_Walk_4.png",
+      "Babies/Baby_Walk_5.png",
+      "Babies/Baby_GetUp_1.png",
+      "Babies/Baby_GetUp_2.png",
+      "Babies/Baby_GetUp_3.png",
+      "Babies/Baby_GetUp_4.png",
+      "Babies/DeadBaby.png",
+      "Babies/Balloon.png",
+      "Babies/Baby_Bomb.png"
+    ],
+    "cols": 4,
+    "rows": 4
+  },
+  "props": {
+    "files": [
+      "Crates/Crate.png",
+      "Crates/FlameThrower_Crate.png",
+      "Crates/Gravity_Crate.png",
+      "Crates/Grenade_Crate.png",
+      "Crates/Gun_Crate.png",
+      "Crates/IonCannon_Crate.png",
+      "Crates/Nuke_Crate.png",
+      "Crates/Paracute.png",
+      "Crates/Plasma_Crate.png",
+      "Crates/Rail_Crate.png",
+      "Crates/Random_Crate.png",
+      "Crates/Rocket_Crate.png",
+      "Crates/Shield_Crate.png",
+      "Crates/Time_Crate.png",
+      "Weapons/Grenade.png",
+      "Weapons/Plasma.png",
+      "Weapons/Rocket.png",
+      "Aimers/Aimer_Blue.png",
+      "Aimers/Aimer_Green.png",
+      "Aimers/Aimer_Red.png",
+      "Aimers/Aimer_Yellow.png"
+    ],
+    "cols": 4,
+    "rows": 6
+  }
+}

@@ -1,0 +1,12 @@
+Original: soundtrack supplied with the existing v9 game files (music3.ogg).
+Static Reactor: original synthesized big-beat composition prepared for this game,
+144 BPM, D minor, stereo, 48 kHz, 20-second loop. No samples from third-party
+recordings were used. Composition source is in source/music/compose_static_reactor.py.
+Acid Circuit (menu label Acid House): original synthesized 20-second acid-house
+composition, 120 BPM, resonant saw bass and synthesized drums. Source is included.
+Game Over: generic synthetic speech produced with eSpeak NG and processed with
+EQ, compression and echo. Winner fanfare: original synthesized brass/bell phrase.
+
+Rock: original 20-second 144 BPM guitar-rock composition. All guitar, bass and
+drum sounds synthesized; no reference recordings or third-party song samples.
+Winner: eSpeak NG synthetic spoken cue and newly synthesized victory sting.

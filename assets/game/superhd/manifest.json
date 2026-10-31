@@ -1,0 +1,14 @@
+{
+  "style": "Super HD - bronze industrial scenery and hand-painted rock",
+  "textures": [
+    "backgrounds/train_bg3.png",
+    "backgrounds/train_bg2.png"
+  ],
+  "size": [
+    2048,
+    2048
+  ],
+  "fallback": "hd then original",
+  "original_alpha_silhouettes": true,
+  "no_gameplay_changes": true
+}
